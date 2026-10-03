@@ -89,13 +89,23 @@ class MathDefenseGame {
             const containerW = container.clientWidth;
             const containerH = container.clientHeight || (containerW * (9 / 16));
 
-            // Fit 16:9 ratio
+            // Fit 16:9 ratio within container and viewport
             let w = containerW;
             let h = containerW * (this.baseHeight / this.baseWidth);
 
-            if (h > window.innerHeight * 0.65) {
-                h = window.innerHeight * 0.65;
+            const isLandscape = window.innerWidth > window.innerHeight;
+            const maxH = (isLandscape && window.innerHeight <= 600) 
+                ? (window.innerHeight - 40) 
+                : (window.innerHeight * 0.65);
+
+            if (h > maxH) {
+                h = maxH;
                 w = h * (this.baseWidth / this.baseHeight);
+            }
+
+            if (w > containerW) {
+                w = containerW;
+                h = w * (this.baseHeight / this.baseWidth);
             }
 
             this.canvas.width = this.baseWidth;

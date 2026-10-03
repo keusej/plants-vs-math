@@ -374,24 +374,24 @@ canvas#gameCanvas {
     max-width: 960px;
     margin-top: 6px;
     background: linear-gradient(180deg, #795548 0%, #4e342e 100%);
-    border: 4px solid #3e2723;
+    border: 3px solid #3e2723;
     border-radius: 14px;
-    padding: 10px 16px;
+    padding: 8px 14px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
 }
 
 .card-display-box {
     flex: 1;
-    min-width: 270px;
+    min-width: 240px;
     background: #FFF9C4;
     border: 3px solid #F57F17;
     border-radius: 12px;
-    padding: 8px 14px;
+    padding: 6px 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -419,7 +419,7 @@ canvas#gameCanvas {
 }
 
 .problem-text {
-    font-size: 34px;
+    font-size: 28px;
     font-weight: 900;
     color: #212121;
     letter-spacing: 1px;
@@ -435,25 +435,25 @@ canvas#gameCanvas {
 }
 
 .answer-input-slot {
-    margin-top: 4px;
-    font-size: 30px;
+    margin-top: 3px;
+    font-size: 24px;
     font-weight: 900;
     color: #1B5E20;
-    min-height: 38px;
+    min-height: 32px;
     background: #FFFFFF;
-    border: 3px dashed #F57F17;
-    border-radius: 9px;
-    padding: 2px 20px;
+    border: 2.5px dashed #F57F17;
+    border-radius: 8px;
+    padding: 2px 16px;
     letter-spacing: 2px;
 }
 
 .hint-box {
-    margin-top: 4px;
+    margin-top: 3px;
     background: #E8F5E9;
     border: 2px solid #81C784;
     border-radius: 8px;
-    padding: 3px 10px;
-    font-size: 13px;
+    padding: 2px 8px;
+    font-size: 12px;
     font-weight: bold;
     color: #1B5E20;
     text-align: center;
@@ -463,10 +463,10 @@ canvas#gameCanvas {
 .keypad-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    gap: 5px;
     flex: 1;
-    min-width: 270px;
-    max-width: 340px;
+    min-width: 240px;
+    max-width: 290px;
 }
 
 .keypad-btn {
@@ -475,9 +475,10 @@ canvas#gameCanvas {
     border-radius: 8px;
     color: #37474F;
     font-family: inherit;
-    font-size: 21px;
+    font-size: 18px;
     font-weight: 900;
-    padding: 7px 0;
+    padding: 6px 0;
+    min-height: 36px;
     cursor: pointer;
     box-shadow: 0 3px 0 #F57F17;
     transition: transform 0.08s, box-shadow 0.08s;
@@ -1004,34 +1005,39 @@ canvas#gameCanvas {
     .flashcard-panel {
         flex-direction: column;
         align-items: center;
-        padding: 8px 12px;
+        padding: 6px 12px;
         margin-top: 4px;
-        gap: 8px;
-        border-width: 3px;
+        gap: 6px;
+        border-width: 2.5px;
         border-radius: 12px;
     }
     .card-display-box {
         width: 100%;
+        max-width: 380px;
         min-width: unset;
-        padding: 6px 12px;
+        padding: 5px 10px;
     }
     .problem-text {
-        font-size: 28px;
+        font-size: 22px;
     }
     .answer-input-slot {
-        font-size: 26px;
-        min-height: 34px;
-        padding: 2px 16px;
+        font-size: 20px;
+        min-height: 28px;
+        padding: 1px 12px;
     }
     .keypad-grid {
         width: 100%;
-        max-width: 100%;
-        gap: 6px;
+        max-width: 280px;
+        margin: 0 auto;
+        gap: 4px;
     }
     .keypad-btn {
-        font-size: 22px;
-        padding: 10px 0;
-        min-height: 46px;
+        font-size: 17px;
+        padding: 6px 0;
+        min-height: 36px;
+    }
+    .keypad-btn.action-btn, .keypad-btn.fire-btn {
+        font-size: 13px;
     }
 }
 
@@ -1134,32 +1140,62 @@ canvas#gameCanvas {
         padding: 3px 8px;
         top: 32px;
     }
+    .game-container {
+        border-width: 2px;
+        border-radius: 8px;
+    }
     .flashcard-panel {
-        padding: 6px 8px;
-        gap: 6px;
+        width: 100%;
+        max-width: 300px;
+        margin: 3px auto 0;
+        padding: 4px 6px;
+        gap: 3px;
+        border-radius: 8px;
+        border-width: 2px;
+    }
+    .card-display-box {
+        width: 100%;
+        max-width: 280px;
+        padding: 3px 6px;
+        border-radius: 6px;
+        border-width: 2px;
     }
     .problem-text {
-        font-size: 24px;
+        font-size: 18px;
     }
     .answer-input-slot {
-        font-size: 22px;
-        min-height: 30px;
-        padding: 1px 12px;
+        font-size: 16px;
+        min-height: 22px;
+        padding: 0 8px;
+        margin-top: 1px;
+        border-width: 2px;
+    }
+    .hint-box {
+        font-size: 9.5px;
+        padding: 1px 4px;
+        margin-top: 1px;
     }
     .keypad-grid {
-        gap: 5px;
+        width: 100%;
+        max-width: 250px;
+        margin: 0 auto;
+        gap: 3px;
     }
     .keypad-btn {
-        font-size: 20px;
-        padding: 9px 0;
-        min-height: 44px;
+        font-size: 14px;
+        padding: 4px 0;
+        min-height: 32px;
+        border-radius: 6px;
+    }
+    .keypad-btn.action-btn, .keypad-btn.fire-btn {
+        font-size: 11px;
     }
     .help-footer {
         display: none;
     }
     .wave-banner {
-        font-size: 16px;
-        padding: 6px 14px;
+        font-size: 15px;
+        padding: 5px 12px;
         border-width: 2px;
         border-radius: 10px;
         white-space: nowrap;
@@ -1201,56 +1237,62 @@ canvas#gameCanvas {
         justify-content: center;
         gap: 6px;
         width: 100%;
-        max-width: 1050px;
+        max-width: 100vw;
     }
     .game-container {
-        flex: 1.55;
-        max-width: 63%;
+        flex: 1;
+        max-width: calc(100% - 200px);
         height: auto;
         border-width: 2px;
         border-radius: 10px;
     }
     .flashcard-panel {
-        flex: 1;
-        max-width: 37%;
+        flex: 0 0 190px;
+        width: 190px;
+        max-width: 190px;
         margin-top: 0;
-        padding: 5px;
+        padding: 3px 5px;
         border-width: 2px;
-        border-radius: 10px;
+        border-radius: 8px;
         flex-direction: column;
         justify-content: space-between;
-        gap: 4px;
+        gap: 3px;
     }
     .card-display-box {
-        padding: 3px 6px;
+        padding: 2px 4px;
         width: 100%;
         min-width: unset;
+        border-radius: 6px;
+        border-width: 2px;
     }
     .problem-text {
-        font-size: 20px;
+        font-size: 16px;
     }
     .answer-input-slot {
-        font-size: 18px;
-        min-height: 24px;
-        padding: 1px 10px;
-        margin-top: 2px;
+        font-size: 15px;
+        min-height: 20px;
+        padding: 0 6px;
+        margin-top: 1px;
+        border-width: 1.5px;
     }
     .hint-box {
-        font-size: 10px;
-        padding: 2px 4px;
+        font-size: 9px;
+        padding: 1px 3px;
+        margin-top: 1px;
     }
     .keypad-grid {
         width: 100%;
         max-width: 100%;
-        gap: 3px;
+        gap: 2.5px;
     }
     .keypad-btn {
-        font-size: 16px;
-        padding: 5px 0;
-        min-height: 32px;
+        font-size: 13px;
+        padding: 3px 0;
+        min-height: 25px;
+        border-radius: 5px;
     }
     .keypad-btn.action-btn, .keypad-btn.fire-btn {
-        font-size: 13px;
+        font-size: 10px;
     }
     .help-footer {
         display: none;
