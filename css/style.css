@@ -1160,22 +1160,7 @@ canvas#gameCanvas {
         border-radius: 3px;
     }
     .speed-control-hud {
-        padding: 2px 5px;
-        gap: 2px;
-        border-radius: 5px;
-        border-width: 1.5px;
-        cursor: pointer;
-    }
-    .speed-label-text, .speed-slider-compact {
         display: none !important;
-    }
-    .speed-icon-compact {
-        display: inline !important;
-        font-size: 10px;
-    }
-    #hudSpeedBadge {
-        font-size: 8.5px;
-        font-weight: 800;
     }
     .seed-tray-left {
         left: 3px;
@@ -1429,10 +1414,13 @@ canvas#gameCanvas {
         left: 4px;
         right: 4px;
     }
-    .health-container, .wave-progress-container, .speed-control-hud {
+    .health-container, .wave-progress-container {
         padding: 2px 5px;
         font-size: 10px;
         border-radius: 6px;
+    }
+    .speed-control-hud {
+        display: none !important;
     }
     .health-bar-bg {
         width: 55px;
@@ -1441,9 +1429,6 @@ canvas#gameCanvas {
     .wave-bar-bg {
         width: 60px;
         height: 8px;
-    }
-    .speed-slider-compact {
-        width: 36px;
     }
     .wave-banner {
         font-size: 15px;
@@ -1570,5 +1555,8 @@ canvas#gameCanvas {
     .btn-primary, .btn-secondary {
         padding: 10px 18px;
         font-size: 14px;
+    }
+    .speed-control-hud {
+        display: none !important;
     }
 }
