@@ -1053,96 +1053,101 @@ canvas#gameCanvas {
 /* Compact Mobile Phones - Portrait (max-width: 520px) */
 @media (max-width: 520px) {
     body {
-        padding: 2px;
+        padding: 2px 2px 85px 2px;
     }
     .game-header {
         flex-wrap: wrap;
         justify-content: center;
-        gap: 4px;
-        padding: 4px 6px;
+        gap: 3px;
+        padding: 3px 5px;
         border-radius: 8px;
         border-width: 2px;
+        margin-bottom: 2px;
     }
     .logo-area {
         width: 100%;
         justify-content: center;
-        gap: 6px;
+        gap: 4px;
     }
     .logo-icon {
-        font-size: 18px;
-    }
-    .game-title {
         font-size: 15px;
     }
+    .game-title {
+        font-size: 13px;
+    }
     .top-stats {
-        gap: 3px;
+        gap: 2px;
         justify-content: center;
         flex-wrap: wrap;
     }
     .stat-badge {
-        padding: 2px 6px;
-        font-size: 11px;
-        gap: 3px;
+        padding: 2px 4px;
+        font-size: 10px;
+        gap: 2px;
     }
     .header-btn {
-        padding: 3px 6px;
-        font-size: 11px;
-    }
-    .hud-overlay {
-        top: 4px;
-        left: 4px;
-        right: 4px;
-    }
-    .health-container {
-        padding: 2px 6px;
-        gap: 4px;
-    }
-    .health-bar-bg {
-        width: 60px;
-        height: 10px;
-    }
-    .health-text {
-        font-size: 10px;
-    }
-    .wave-progress-container {
-        padding: 2px 6px;
-        gap: 4px;
-    }
-    .wave-bar-bg {
-        width: 65px;
-        height: 8px;
-    }
-    .speed-control-hud {
         padding: 2px 5px;
         font-size: 10px;
-        gap: 4px;
+    }
+    .hud-overlay {
+        top: 3px;
+        left: 3px;
+        right: 3px;
+        gap: 3px;
+    }
+    .health-container {
+        padding: 2px 4px;
+        gap: 3px;
+        border-radius: 6px;
+    }
+    .health-bar-bg {
+        width: 45px;
+        height: 8px;
+    }
+    .health-text {
+        font-size: 9px;
+    }
+    .wave-progress-container {
+        padding: 2px 4px;
+        gap: 3px;
+        border-radius: 6px;
+    }
+    .wave-bar-bg {
+        width: 45px;
+        height: 7px;
+    }
+    .speed-control-hud {
+        padding: 2px 4px;
+        font-size: 8.5px;
+        gap: 2px;
+        border-radius: 6px;
     }
     .speed-slider-compact {
-        width: 40px;
+        width: 28px;
     }
     .seed-tray-left {
-        left: 5px;
-        top: 36px;
-        gap: 4px;
+        left: 4px;
+        top: 28px;
+        gap: 3px;
     }
     .seed-packet {
-        width: 42px;
-        height: 54px;
-        border-radius: 6px;
+        width: 36px;
+        height: 46px;
+        border-radius: 5px;
         padding: 1px;
     }
     .seed-cost {
-        font-size: 8px;
+        font-size: 7px;
         padding: 0 2px;
     }
     .seed-avatar {
-        font-size: 18px;
+        font-size: 16px;
     }
     .seed-label {
-        font-size: 6.5px;
+        font-size: 5.5px;
     }
     .cooldown-overlay {
-        font-size: 7.5px;
+        font-size: 7px;
     }
     .multiples-target-badge {
         font-size: 11px;
