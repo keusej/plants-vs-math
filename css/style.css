@@ -832,6 +832,15 @@ canvas#gameCanvas {
     box-shadow: 0 3px 0 #1b5e20;
 }
 
+.mobile-sound-hint {
+    font-size: 11.5px;
+    color: #FFF59D;
+    text-align: center;
+    margin-top: 8px;
+    line-height: 1.4;
+    opacity: 0.9;
+}
+
 .btn-secondary {
     background: linear-gradient(180deg, #ffa726 0%, #f57c00 100%);
     border: 3px solid #e65100;

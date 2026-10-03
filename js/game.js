@@ -386,7 +386,11 @@ class MathDefenseGame {
 
         // On-screen Numpad Keys
         document.querySelectorAll('.keypad-btn').forEach(btn => {
+            btn.addEventListener('touchend', () => {
+                window.soundEffects.unlock();
+            }, { passive: true });
             btn.addEventListener('click', (e) => {
+                window.soundEffects.unlock();
                 // Subtle tactile haptic pulse on mobile devices
                 if (window.navigator?.vibrate) {
                     try { window.navigator.vibrate(12); } catch (_) {}

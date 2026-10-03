@@ -222,30 +222,44 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGameModeUI('classic');
 
     // Start Game Button
-    document.getElementById('startPlayBtn')?.addEventListener('click', () => {
+    const startBtn = document.getElementById('startPlayBtn');
+    const onStart = () => {
+        window.soundEffects.unlock();
         window.mathEngine.setOperations(selectedOperations);
         window.mathEngine.setTables(selectedTables);
         window.game.setSunMultiplesMode(sunMultiplesMode);
         window.game.startGame(1);
-    });
+    };
+    startBtn?.addEventListener('click', onStart);
+    startBtn?.addEventListener('touchend', () => { window.soundEffects.unlock(); }, { passive: true });
 
     // Next Wave Button
-    document.getElementById('nextWaveBtn')?.addEventListener('click', () => {
+    const nextBtn = document.getElementById('nextWaveBtn');
+    const onNext = () => {
+        window.soundEffects.unlock();
         const nextWave = (window.game.currentWave || 1) + 1;
         window.game.startGame(nextWave);
-    });
+    };
+    nextBtn?.addEventListener('click', onNext);
+    nextBtn?.addEventListener('touchend', () => { window.soundEffects.unlock(); }, { passive: true });
 
     // Retry / Try Again Button
-    document.getElementById('retryBtn')?.addEventListener('click', () => {
+    const retryBtn = document.getElementById('retryBtn');
+    const onRetry = () => {
+        window.soundEffects.unlock();
         window.game.startGame(1);
-    });
+    };
+    retryBtn?.addEventListener('click', onRetry);
+    retryBtn?.addEventListener('touchend', () => { window.soundEffects.unlock(); }, { passive: true });
 
     // Pause / Resume Buttons
     document.getElementById('pauseBtn')?.addEventListener('click', () => {
+        window.soundEffects.unlock();
         window.game.togglePause();
     });
 
     document.getElementById('resumeBtn')?.addEventListener('click', () => {
+        window.soundEffects.unlock();
         window.game.togglePause();
     });
 
@@ -259,10 +273,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mute Button Toggle
     const muteBtn = document.getElementById('muteBtn');
     muteBtn?.addEventListener('click', () => {
+        window.soundEffects.unlock();
         const isMuted = window.soundEffects.toggleMute();
         muteBtn.textContent = isMuted ? '🔇 Muted' : '🔊 Sound';
         muteBtn.style.background = isMuted ? '#b71c1c' : '';
     });
+    muteBtn?.addEventListener('touchend', () => {
+        window.soundEffects.unlock();
+    }, { passive: true });
 
     // Report Card Modal & Rendering
     function renderReportCard() {

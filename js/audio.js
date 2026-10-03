@@ -12,19 +12,98 @@ class SoundEffects {
         this.isMusicPlaying = false;
         this.musicInterval = null;
         this.currentNoteIndex = 0;
+        this.unlocked = false;
+        this.unlockedMedia = false;
+        this.setupUnlockListeners();
+    }
+
+    setupUnlockListeners() {
+        const events = ['touchstart', 'touchend', 'pointerdown', 'mousedown', 'keydown', 'click'];
+        const unlockHandler = () => {
+            this.unlock();
+        };
+        events.forEach(e => {
+            window.addEventListener(e, unlockHandler, { capture: true, passive: true });
+            document.addEventListener(e, unlockHandler, { capture: true, passive: true });
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && this.ctx) {
+                if (this.ctx.state === 'suspended' || this.ctx.state === 'interrupted') {
+                    this.ctx.resume().catch(() => {});
+                }
+            }
+        });
+    }
+
+    unlock() {
+        // 1. Tell iOS AudioSession this is playback (games/media, plays through silent switch when possible)
+        if (typeof navigator !== 'undefined' && navigator.audioSession) {
+            try {
+                navigator.audioSession.type = 'playback';
+            } catch (_) {}
+        }
+
+        // 2. Initialize AudioContext if not yet created
+        if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                this.ctx = new AudioCtx();
+            }
+        }
+
+        // 3. Resume AudioContext if suspended or interrupted
+        if (this.ctx) {
+            if (this.ctx.state === 'suspended' || this.ctx.state === 'interrupted') {
+                this.ctx.resume().catch(() => {});
+            }
+
+            // 4. Play silent 1-sample buffer to unlock WebKit audio hardware pipeline
+            try {
+                const buffer = this.ctx.createBuffer(1, 1, 22050);
+                const source = this.ctx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(this.ctx.destination);
+                source.start(0);
+            } catch (_) {}
+        }
+
+        // 5. HTML5 Audio silent track trick to promote iOS WebKit audio channel to media category
+        if (!this.unlockedMedia) {
+            try {
+                const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+                silentAudio.volume = 0.01;
+                const p = silentAudio.play();
+                if (p && typeof p.then === 'function') {
+                    p.then(() => {
+                        silentAudio.pause();
+                        this.unlockedMedia = true;
+                    }).catch(() => {});
+                } else {
+                    this.unlockedMedia = true;
+                }
+            } catch (_) {}
+        }
+
+        this.unlocked = true;
     }
 
     init() {
-        if (!this.ctx) {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            this.ctx = new AudioCtx();
+        this.unlock();
+    }
+
+    ready() {
+        if (this.muted) return false;
+        this.unlock();
+        if (!this.ctx) return false;
+        if (this.ctx.state === 'suspended' || this.ctx.state === 'interrupted') {
+            this.ctx.resume().catch(() => {});
         }
-        if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
-        }
+        return true;
     }
 
     toggleMute() {
+        this.unlock();
         this.muted = !this.muted;
         if (this.muted && this.isMusicPlaying) {
             this.stopBGM();
@@ -36,8 +115,7 @@ class SoundEffects {
 
     // Peashooter firing "pop / thwack"
     playShoot(isFire = false, isIce = false) {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         // Pop oscillator
@@ -76,8 +154,7 @@ class SoundEffects {
 
     // Pea hit splat
     playHit(isArmor = false) {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         if (isArmor) {
@@ -111,8 +188,7 @@ class SoundEffects {
 
     // Zombie groan
     playZombieGroan() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
@@ -141,8 +217,7 @@ class SoundEffects {
 
     // Zombie chomp attack
     playChomp() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const osc = this.ctx.createOscillator();
@@ -164,8 +239,7 @@ class SoundEffects {
 
     // Correct answer chime (scales up pitch with combo streak)
     playCorrect(streak = 1) {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         // Base pentatonic note progression
@@ -199,8 +273,7 @@ class SoundEffects {
 
     // Wrong answer buzzer
     playWrong() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const osc = this.ctx.createOscillator();
@@ -222,8 +295,7 @@ class SoundEffects {
 
     // Lawnmower engine starting and zooming
     playLawnmower() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const osc = this.ctx.createOscillator();
@@ -247,8 +319,7 @@ class SoundEffects {
 
     // Sun points collection chime
     playSunCollect() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const osc1 = this.ctx.createOscillator();
@@ -278,8 +349,7 @@ class SoundEffects {
 
     // Cherry Bomb fuse & swelling sizzle
     playCherrySizzle() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const osc = this.ctx.createOscillator();
@@ -303,8 +373,7 @@ class SoundEffects {
 
     // Cherry Bomb big boom explosion
     playCherryExplode() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         // Low frequency sub-thump
@@ -330,8 +399,7 @@ class SoundEffects {
 
     // Plant placement thud (Potato Mine or other plants)
     playPlant() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const osc = this.ctx.createOscillator();
@@ -354,8 +422,7 @@ class SoundEffects {
 
     // Plant upgrade chime (Double Shot / Repeater)
     playUpgrade() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         // Bright rising arpeggio: C5 -> E5 -> G5 -> C6
@@ -381,8 +448,7 @@ class SoundEffects {
 
     // Potato Mine "SPUDOW!" detonation
     playPotatoExplode() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         // Sharp initial pop/crack
@@ -407,8 +473,7 @@ class SoundEffects {
 
     // Boss Gargantuar entrance roar
     playBossRoar() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const osc = this.ctx.createOscillator();
@@ -438,8 +503,7 @@ class SoundEffects {
 
     // Heavy boss footstep thud
     playBossThud() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const osc = this.ctx.createOscillator();
@@ -460,8 +524,7 @@ class SoundEffects {
 
     // Imp fling / throw sound
     playImpThrow() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const osc = this.ctx.createOscillator();
@@ -482,8 +545,7 @@ class SoundEffects {
 
     // Fanfare when wave starts or warning
     playWaveWarning() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
 
         const chords = [220, 261.63, 329.63, 440];
@@ -503,8 +565,7 @@ class SoundEffects {
 
     // Victory Fanfare
     playVictory() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
         const notes = [
             { f: 523.25, d: 0.15 },
@@ -532,8 +593,7 @@ class SoundEffects {
 
     // Game Over Sound
     playGameOver() {
-        if (this.muted) return;
-        this.init();
+        if (!this.ready()) return;
         const now = this.ctx.currentTime;
         const notes = [293.66, 277.18, 261.63, 246.94];
 
@@ -555,7 +615,7 @@ class SoundEffects {
 
     // Noise helper for splat & puff
     playNoise(duration = 0.1, volume = 0.3, cutoff = 1000) {
-        if (!this.ctx || this.muted) return;
+        if (!this.ready()) return;
         const bufferSize = this.ctx.sampleRate * duration;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
@@ -583,8 +643,7 @@ class SoundEffects {
 
     // Playful Garden Background Music Synthesizer
     startBGM() {
-        if (this.muted || this.isMusicPlaying) return;
-        this.init();
+        if (!this.ready() || this.isMusicPlaying) return;
         this.isMusicPlaying = true;
 
         // Catchy, cute garden pizzicato pattern
@@ -598,6 +657,10 @@ class SoundEffects {
 
         this.musicInterval = setInterval(() => {
             if (!this.isMusicPlaying || this.muted) return;
+            if (this.ctx && (this.ctx.state === 'suspended' || this.ctx.state === 'interrupted')) {
+                this.ctx.resume().catch(() => {});
+            }
+            if (!this.ctx) return;
             const now = this.ctx.currentTime;
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
