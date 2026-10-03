@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="stylesheet" href="css/style.css?v=5.2">
+    <link rel="stylesheet" href="css/style.css?v=5.3">
 </head>
 <body>
 
@@ -212,7 +212,7 @@
 
             <button id="startPlayBtn" class="btn-primary">DEFEND THE LAWN! 🌿</button>
             <p class="mobile-sound-hint">🔊 Mobile Tip: If playing on iPhone/iPad, make sure your side Silent Switch is OFF and volume is up!</p>
-            <p class="mobile-safari-hint">📱 <strong>Safari Fullscreen:</strong> For full edge-to-edge screen, tap Share ➔ <strong>"Add to Home Screen"</strong>, or tap <strong>"aA"</strong> ➔ <strong>"Hide Toolbar"</strong>! <button type="button" id="startSafariHelpBtn" class="safari-help-link">Full Guide ℹ️</button></p>
+            <p class="mobile-safari-hint">📱 <strong>Safari Fullscreen:</strong> Tap Share ➔ <strong>"Add to Home Screen"</strong>, or tap <strong>"aA"</strong> ➔ <strong>"Hide Toolbar"</strong>! <button type="button" id="startSafariHelpBtn" class="safari-help-link">Full Guide ℹ️</button> | <button type="button" id="startRefreshBtn" class="safari-help-link">🔄 Check Updates</button></p>
         </div>
     </div>
 
@@ -296,7 +296,10 @@
             <br>
             <button id="restartBtn" class="btn-secondary">Change Tables / Restart 🔄</button>
             <br>
-            <button type="button" id="pauseSafariTipsBtn" class="safari-help-link" style="margin-top: 12px; font-size: 13px;">📱 Safari Fullscreen Guide ℹ️</button>
+            <div style="margin-top: 12px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button type="button" id="pauseRefreshBtn" class="safari-help-link" style="font-size: 12px;">🔄 Check Updates / Reload</button>
+                <button type="button" id="pauseSafariTipsBtn" class="safari-help-link" style="font-size: 12px;">📱 Fullscreen Guide ℹ️</button>
+            </div>
         </div>
     </div>
 
@@ -348,10 +351,10 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/audio.js?v=5.2"></script>
-    <script src="js/mathEngine.js?v=5.2"></script>
-    <script src="js/entities.js?v=5.2"></script>
-    <script src="js/game.js?v=5.2"></script>
-    <script src="js/ui.js?v=5.2"></script>
+    <script src="js/audio.js?v=5.3"></script>
+    <script src="js/mathEngine.js?v=5.3"></script>
+    <script src="js/entities.js?v=5.3"></script>
+    <script src="js/game.js?v=5.3"></script>
+    <script src="js/ui.js?v=5.3"></script>
 </body>
 </html>

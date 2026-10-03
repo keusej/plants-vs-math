@@ -399,4 +399,13 @@ document.addEventListener('DOMContentLoaded', () => {
             openSafariTips();
         }
     });
+
+    // Check Updates / Reload Handlers (forces fresh cache for pinned Home Screen Web Apps)
+    const reloadWithFreshCache = () => {
+        window.soundEffects?.unlock();
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.location.replace(cleanUrl + '?t=' + Date.now());
+    };
+    document.getElementById('startRefreshBtn')?.addEventListener('click', reloadWithFreshCache);
+    document.getElementById('pauseRefreshBtn')?.addEventListener('click', reloadWithFreshCache);
 });
