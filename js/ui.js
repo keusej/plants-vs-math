@@ -362,4 +362,41 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('closeReportBtn')?.addEventListener('click', () => {
         document.getElementById('reportModal').classList.add('hidden');
     });
+
+    // Safari Tips Modal Handlers
+    const safariTipsModal = document.getElementById('safariTipsModal');
+    const openSafariTips = () => {
+        window.soundEffects?.unlock();
+        safariTipsModal?.classList.remove('hidden');
+    };
+    const closeSafariTips = () => {
+        safariTipsModal?.classList.add('hidden');
+    };
+
+    document.getElementById('startSafariHelpBtn')?.addEventListener('click', openSafariTips);
+    document.getElementById('pauseSafariTipsBtn')?.addEventListener('click', openSafariTips);
+    document.getElementById('closeSafariTipsBtn')?.addEventListener('click', closeSafariTips);
+
+    // Header Fullscreen Button
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    fullscreenBtn?.addEventListener('click', () => {
+        window.soundEffects?.unlock();
+        const doc = document;
+        const docEl = doc.documentElement;
+        const requestFs = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+        const exitFs = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+
+        const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
+
+        if (isFs) {
+            if (exitFs) exitFs.call(doc);
+        } else if (requestFs) {
+            requestFs.call(docEl).catch(() => {
+                openSafariTips();
+            });
+        } else {
+            // iOS Safari on iPhone lacks Element.requestFullscreen API
+            openSafariTips();
+        }
+    });
 });

@@ -1269,17 +1269,26 @@ canvas#gameCanvas {
     }
 }
 
-/* Mobile Phones - Landscape Mode (max-height: 520px and orientation: landscape) */
-@media (max-height: 520px) and (orientation: landscape) {
+/* Mobile Phones - Landscape Mode (max-height: 600px and orientation: landscape) */
+@media (max-height: 600px) and (orientation: landscape) {
     body {
         padding: 2px 6px;
-        min-height: 100vh;
+        padding-left: max(6px, env(safe-area-inset-left));
+        padding-right: max(6px, env(safe-area-inset-right));
+        padding-top: max(2px, env(safe-area-inset-top));
+        padding-bottom: max(2px, env(safe-area-inset-bottom));
+        height: 100svh; /* Safari visible area with browser bars open */
+        height: 100dvh; /* Adapts dynamically when toolbar hides/shows */
+        max-height: 100dvh;
+        overflow: hidden;
+        box-sizing: border-box;
     }
     .game-header {
         padding: 2px 8px;
         margin-bottom: 2px;
         border-radius: 8px;
         border-width: 2px;
+        flex-shrink: 0;
     }
     .logo-icon {
         font-size: 15px;
@@ -1304,25 +1313,35 @@ canvas#gameCanvas {
         gap: 6px;
         width: 100%;
         max-width: 100vw;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
     }
     .game-container {
         flex: 1;
-        max-width: calc(100% - 200px);
-        height: auto;
+        max-width: calc(100% - 198px);
+        height: 100%;
+        min-height: 0;
         border-width: 2px;
         border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
     .flashcard-panel {
         flex: 0 0 190px;
         width: 190px;
         max-width: 190px;
+        height: 100%;
+        min-height: 0;
         margin-top: 0;
         padding: 3px 5px;
         border-width: 2px;
         border-radius: 8px;
         flex-direction: column;
         justify-content: space-between;
-        gap: 3px;
+        gap: 2px;
+        overflow-y: auto;
     }
     .card-display-box {
         padding: 2px 4px;
@@ -1330,6 +1349,7 @@ canvas#gameCanvas {
         min-width: unset;
         border-radius: 6px;
         border-width: 2px;
+        flex-shrink: 0;
     }
     .problem-text {
         font-size: 16px;
@@ -1350,11 +1370,12 @@ canvas#gameCanvas {
         width: 100%;
         max-width: 100%;
         gap: 2.5px;
+        flex-shrink: 0;
     }
     .keypad-btn {
         font-size: 13px;
         padding: 3px 0;
-        min-height: 25px;
+        min-height: 24px;
         border-radius: 5px;
     }
     .keypad-btn.action-btn, .keypad-btn.fire-btn {
@@ -1413,7 +1434,92 @@ canvas#gameCanvas {
         white-space: nowrap;
         max-width: 90%;
     }
+
+    /* Modals in landscape: fit within visible screen */
+    .modal-overlay {
+        height: 100svh;
+        height: 100dvh;
+        padding: 4px;
+    }
+    .modal-content {
+        max-height: 95dvh;
+        max-height: 95svh;
+        padding: 10px 16px;
+        border-width: 4px;
+        border-radius: 14px;
+    }
+    .modal-title {
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+    .modal-subtitle {
+        font-size: 11px;
+        margin-bottom: 8px;
+        line-height: 1.25;
+    }
+    .section-label {
+        font-size: 11px;
+        margin: 4px 0 2px;
+    }
+    .math-op-group, .game-mode-group, .speed-preset-group {
+        gap: 4px;
+    }
+    .op-btn, .gamemode-btn, .speed-preset-btn {
+        padding: 4px 6px;
+        font-size: 10px;
+    }
+    .table-buttons-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 3px;
+        margin-bottom: 4px;
+    }
+    .table-btn {
+        font-size: 12px;
+        padding: 3px 0;
+    }
+    .table-presets {
+        gap: 4px;
+        margin-bottom: 4px;
+    }
+    .preset-chip {
+        padding: 2px 8px;
+        font-size: 10px;
+    }
+    .btn-primary, .btn-secondary {
+        padding: 6px 14px;
+        font-size: 12px;
+    }
+    .mobile-safari-hint, .mobile-sound-hint {
+        font-size: 9.5px;
+        padding: 3px 6px;
+        margin-top: 3px;
+    }
 }
+
+.safari-help-link {
+    background: none;
+    border: none;
+    color: #ffd54f;
+    text-decoration: underline;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0 4px;
+}
+.safari-help-link:hover {
+    color: #ffffff;
+}
+.mobile-safari-hint {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #FFF9C4;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 6px;
+    padding: 4px 8px;
+    border: 1px dashed #ffd54f;
+    text-align: center;
+}
+
 
 /* Modals Mobile Scaling */
 @media (max-width: 768px) {

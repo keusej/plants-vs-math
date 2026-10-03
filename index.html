@@ -6,9 +6,13 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Plants vs Math">
     <meta name="theme-color" content="#1b3a1a">
     <title>Plants vs. Math: Multiplication Lawn Defense</title>
-    <link rel="stylesheet" href="css/style.css?v=4.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css?v=5.0">
 </head>
 <body>
 
@@ -39,6 +43,7 @@
             <button id="muteBtn" class="header-btn" title="Toggle Sound & Music">
                 <span id="muteIcon">🔊</span><span class="btn-word-label"> Sound</span>
             </button>
+            <button id="fullscreenBtn" class="header-btn" title="Toggle Fullscreen / Safari Viewport Tips">⛶</button>
             <button id="pauseBtn" class="header-btn" title="Pause Game">⏸️</button>
             <button id="reportBtn" class="header-btn hidden" style="display: none;" title="View Multiplication Report Card">📊 Report</button>
         </div>
@@ -207,6 +212,7 @@
 
             <button id="startPlayBtn" class="btn-primary">DEFEND THE LAWN! 🌿</button>
             <p class="mobile-sound-hint">🔊 Mobile Tip: If playing on iPhone/iPad, make sure your side Silent Switch is OFF and volume is up!</p>
+            <p class="mobile-safari-hint">📱 <strong>Safari Fullscreen:</strong> For full edge-to-edge screen, tap Share ➔ <strong>"Add to Home Screen"</strong>, or tap <strong>"aA"</strong> ➔ <strong>"Hide Toolbar"</strong>! <button type="button" id="startSafariHelpBtn" class="safari-help-link">Full Guide ℹ️</button></p>
         </div>
     </div>
 
@@ -283,6 +289,8 @@
             <button id="resumeBtn" class="btn-primary" style="margin-bottom: 10px;">RESUME GAME ▶️</button>
             <br>
             <button id="restartBtn" class="btn-secondary">Change Tables / Restart 🔄</button>
+            <br>
+            <button type="button" id="pauseSafariTipsBtn" class="safari-help-link" style="margin-top: 12px; font-size: 13px;">📱 Safari Fullscreen Guide ℹ️</button>
         </div>
     </div>
 
@@ -300,11 +308,44 @@
         </div>
     </div>
 
+    <!-- 6. Safari & Mobile Fullscreen Tips Modal -->
+    <div id="safariTipsModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 500px; text-align: left;">
+            <h2 class="modal-title" style="text-align: center; font-size: 24px;">📱 iPhone Safari Fullscreen Guide</h2>
+            <p class="modal-subtitle" style="text-align: center; margin-bottom: 14px;">
+                How to hide the tab bar & address bar for a borderless gaming experience:
+            </p>
+            
+            <div style="background: rgba(0,0,0,0.35); border: 2px solid #81C784; border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+                <div style="font-weight: 900; color: #FFEB3B; font-size: 15px; margin-bottom: 6px;">🌟 Method 1: Add to Home Screen (Recommended!)</div>
+                <p style="font-size: 13px; line-height: 1.5; color: #E8F5E9; margin-bottom: 6px;">
+                    Installs the game as a native standalone app with <strong>zero browser bars, no tabs, and full edge-to-edge screen</strong>:
+                </p>
+                <ol style="margin-left: 20px; font-size: 13px; line-height: 1.6; color: #FFFDE7;">
+                    <li>In Safari, tap the <strong>Share</strong> button (square with arrow ⎋) at the bottom/top.</li>
+                    <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+                    <li>Tap <strong>"Add"</strong> in the top-right corner.</li>
+                    <li>Open <strong>"Plants vs Math"</strong> from your home screen!</li>
+                </ol>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.35); border: 2px solid #FFB74D; border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+                <div style="font-weight: 900; color: #FFD54F; font-size: 15px; margin-bottom: 6px;">⚡ Method 2: Hide Toolbar & Tabs in Safari</div>
+                <ul style="margin-left: 20px; font-size: 13px; line-height: 1.6; color: #FFF9C4;">
+                    <li><strong>Hide Address Bar:</strong> Tap the <strong>"aA"</strong> button in Safari's address bar ➔ select <strong>"Hide Toolbar"</strong>.</li>
+                    <li><strong>Hide Landscape Tab Row:</strong> Open iPhone <strong>Settings ➔ Safari ➔</strong> under <em>Tabs</em>, switch <strong>"Landscape Tab Bar"</strong> to <strong>OFF</strong>.</li>
+                </ul>
+            </div>
+
+            <button id="closeSafariTipsBtn" class="btn-primary" style="width: 100%; padding: 10px 0;">GOT IT! 👍</button>
+        </div>
+    </div>
+
     <!-- Scripts -->
-    <script src="js/audio.js?v=4.0"></script>
-    <script src="js/mathEngine.js?v=4.0"></script>
-    <script src="js/entities.js?v=4.0"></script>
-    <script src="js/game.js?v=4.0"></script>
-    <script src="js/ui.js?v=4.0"></script>
+    <script src="js/audio.js?v=5.0"></script>
+    <script src="js/mathEngine.js?v=5.0"></script>
+    <script src="js/entities.js?v=5.0"></script>
+    <script src="js/game.js?v=5.0"></script>
+    <script src="js/ui.js?v=5.0"></script>
 </body>
 </html>

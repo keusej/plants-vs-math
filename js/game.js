@@ -86,27 +86,36 @@ class MathDefenseGame {
     initCanvas() {
         const resize = () => {
             const container = this.canvas.parentElement;
+            if (!container) return;
             const containerW = container.clientWidth;
-            const containerH = container.clientHeight || (containerW * (9 / 16));
-
-            // Fit 16:9 ratio within container and viewport
-            let w = containerW;
-            let h = containerW * (this.baseHeight / this.baseWidth);
-
             const isLandscape = window.innerWidth > window.innerHeight;
-            const maxH = (isLandscape && window.innerHeight <= 600) 
-                ? (window.innerHeight - 40) 
-                : (window.innerHeight * 0.65);
 
-            if (h > maxH) {
-                h = maxH;
-                w = h * (this.baseWidth / this.baseHeight);
+            const header = document.querySelector('.game-header');
+            const headerH = header ? header.offsetHeight : 30;
+
+            // In landscape, strictly fit within available screen height (between header & bottom safe area)
+            let maxH;
+            if (isLandscape && window.innerHeight <= 700) {
+                maxH = Math.max(160, window.innerHeight - headerH - 14);
+            } else {
+                maxH = window.innerHeight * 0.65;
             }
+
+            // Fit 16:9 ratio within container width AND available height
+            let h = maxH;
+            let w = h * (this.baseWidth / this.baseHeight);
 
             if (w > containerW) {
                 w = containerW;
                 h = w * (this.baseHeight / this.baseWidth);
             }
+            if (h > maxH) {
+                h = maxH;
+                w = h * (this.baseWidth / this.baseHeight);
+            }
+
+            w = Math.floor(w);
+            h = Math.floor(h);
 
             this.canvas.width = this.baseWidth;
             this.canvas.height = this.baseHeight;
@@ -126,6 +135,10 @@ class MathDefenseGame {
         };
 
         window.addEventListener('resize', resize);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resize, 150);
+            setTimeout(resize, 400);
+        });
         resize();
     }
 
