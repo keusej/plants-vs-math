@@ -1319,7 +1319,7 @@ canvas#gameCanvas {
     }
     .game-container {
         flex: 1;
-        max-width: calc(100% - 198px);
+        max-width: calc(100% - 258px);
         height: 100%;
         min-height: 0;
         border-width: 2px;
@@ -1329,35 +1329,39 @@ canvas#gameCanvas {
         align-items: center;
     }
     .flashcard-panel {
-        flex: 0 0 190px;
-        width: 190px;
-        max-width: 190px;
+        flex: 0 0 250px;
+        width: 250px;
+        max-width: 250px;
         height: 100%;
         min-height: 0;
         margin-top: 0;
-        padding: 3px 5px;
+        padding: 4px 6px;
         border-width: 2px;
         border-radius: 8px;
+        display: flex;
         flex-direction: column;
         justify-content: space-between;
-        gap: 2px;
-        overflow-y: auto;
+        gap: 3px;
+        overflow: hidden;
+        box-sizing: border-box;
     }
     .card-display-box {
-        padding: 2px 4px;
+        flex: 0 0 auto;
+        padding: 3px 6px;
         width: 100%;
         min-width: unset;
         border-radius: 6px;
         border-width: 2px;
-        flex-shrink: 0;
+        box-sizing: border-box;
     }
     .problem-text {
-        font-size: 16px;
+        font-size: 17px;
+        line-height: 1.2;
     }
     .answer-input-slot {
-        font-size: 15px;
-        min-height: 20px;
-        padding: 0 6px;
+        font-size: 16px;
+        min-height: 22px;
+        padding: 0 8px;
         margin-top: 1px;
         border-width: 1.5px;
     }
@@ -1367,19 +1371,34 @@ canvas#gameCanvas {
         margin-top: 1px;
     }
     .keypad-grid {
+        flex: 1;
+        min-height: 0;
         width: 100%;
         max-width: 100%;
-        gap: 2.5px;
-        flex-shrink: 0;
+        min-width: unset;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+        gap: 3px;
+        box-sizing: border-box;
     }
     .keypad-btn {
-        font-size: 13px;
-        padding: 3px 0;
+        width: 100%;
+        height: 100%;
         min-height: 24px;
-        border-radius: 5px;
+        font-size: 15px;
+        font-weight: 900;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
     }
-    .keypad-btn.action-btn, .keypad-btn.fire-btn {
-        font-size: 10px;
+    .keypad-btn.action-btn {
+        font-size: 12px;
+    }
+    .keypad-btn.fire-btn {
+        font-size: 12px;
     }
     .help-footer {
         display: none;
