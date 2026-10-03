@@ -1,6 +1,6 @@
 # 🌻 Plants vs. Math: Arithmetic Lawn Defense 🧟
 
-An interactive, web-based flashcard math game designed for 5th graders mastering **Addition, Subtraction, Multiplication, and Division**, crafted in the playful cartoon style of *Plants vs. Zombies*!
+An interactive, web-based flashcard math game designed for elementary students mastering **Addition, Subtraction, Multiplication, and Division**, crafted in the playful cartoon style of *Plants vs. Zombies*!
 
 ---
 
@@ -101,8 +101,8 @@ Choose your sun drop style in the start menu:
 
 ## ⚡ Difficulty & Speed Throttle (Kid-Friendly & Rebalanced)
 
-Adjust how fast the zombies walk towards you at any time. The speed scale has been rebalanced so higher difficulties are friendly and manageable for 5th graders:
-- **🐌 Snail Pace (0.50x)**: The gold-standard learning pace! Recommended baseline for 5th graders mastering arithmetic and building confidence.
+Adjust how fast the zombies walk towards you at any time. The speed scale has been rebalanced so higher difficulties are friendly and manageable for elementary students:
+- **🐌 Snail Pace (0.50x)**: The gold-standard learning pace! Recommended baseline for elementary students mastering arithmetic and building confidence.
 - **🚶 Steady Pace (0.75x)**: Gentle step up with ample thinking time between multiplication problems.
 - **🏃 Brisk Pace (1.00x)**: Standard speed for quick-thinking practice.
 - **⚡ Fast Pace (1.35x)**: Exciting challenge mode without being overwhelmingly fast.
@@ -111,7 +111,7 @@ Adjust how fast the zombies walk towards you at any time. The speed scale has be
 
 ---
 
-## 📚 Educational Features for 5th Graders
+## 📚 Educational Features for elementary students
 
 - **Custom Table Selection**: Practice all tables ($1 - 12$), or isolate specific tables (e.g. practicing only $6, 7, 8, 9, 12$).
 - **Smart Spaced Repetition**: If a student misses a question, the game notes it and gently re-queues that fact 2–3 questions later so they achieve true mastery.
