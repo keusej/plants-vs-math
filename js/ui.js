@@ -272,15 +272,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mute Button Toggle
     const muteBtn = document.getElementById('muteBtn');
+    const updateMuteUI = (isMuted) => {
+        const icon = document.getElementById('muteIcon');
+        if (icon) icon.textContent = isMuted ? '🔇' : '🔊';
+        const label = muteBtn?.querySelector('.btn-word-label');
+        if (label) label.textContent = isMuted ? ' Muted' : ' Sound';
+        if (muteBtn) muteBtn.style.background = isMuted ? '#b71c1c' : '';
+    };
     muteBtn?.addEventListener('click', () => {
         window.soundEffects.unlock();
         const isMuted = window.soundEffects.toggleMute();
-        muteBtn.textContent = isMuted ? '🔇 Muted' : '🔊 Sound';
-        muteBtn.style.background = isMuted ? '#b71c1c' : '';
+        updateMuteUI(isMuted);
     });
     muteBtn?.addEventListener('touchend', () => {
         window.soundEffects.unlock();
     }, { passive: true });
+
+    // Speed HUD Tap to Cycle (great for mobile portrait)
+    document.querySelector('.speed-control-hud')?.addEventListener('click', (e) => {
+        if (e.target.id === 'hudSpeedSlider') return;
+        const speeds = [0.5, 0.75, 1.0, 1.35];
+        const current = window.game ? window.game.speedMultiplier : 0.5;
+        let nextIdx = speeds.findIndex(s => Math.abs(s - current) < 0.05) + 1;
+        if (nextIdx >= speeds.length || nextIdx < 0) nextIdx = 0;
+        syncSpeed(speeds[nextIdx]);
+    });
 
     // Report Card Modal & Rendering
     function renderReportCard() {

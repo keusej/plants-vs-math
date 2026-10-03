@@ -246,6 +246,14 @@ canvas#gameCanvas {
     accent-color: #ff9800;
 }
 
+.speed-icon-compact {
+    display: none;
+}
+
+.stat-word-label, .btn-word-label, .speed-label-text {
+    display: inline;
+}
+
 /* PvZ Seed Tray on Left */
 .seed-tray-left {
     position: absolute;
@@ -1056,13 +1064,15 @@ canvas#gameCanvas {
         padding: 2px 2px 85px 2px;
     }
     .game-header {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 3px;
-        padding: 3px 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 2px 4px;
         border-radius: 8px;
         border-width: 2px;
         margin-bottom: 2px;
+        width: 100%;
     }
     .logo-area {
         width: 100%;
@@ -1070,89 +1080,131 @@ canvas#gameCanvas {
         gap: 4px;
     }
     .logo-icon {
-        font-size: 15px;
+        font-size: 14px;
     }
     .game-title {
-        font-size: 13px;
+        font-size: 11.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 92vw;
+    }
+    .stat-word-label, .btn-word-label {
+        display: none !important;
     }
     .top-stats {
-        gap: 2px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
         justify-content: center;
-        flex-wrap: wrap;
+        align-items: center;
+        gap: 3.5px;
+        width: 100%;
     }
     .stat-badge {
-        padding: 2px 4px;
-        font-size: 10px;
+        padding: 2px 5px;
+        font-size: 10.5px;
         gap: 2px;
+        border-radius: 6px;
+        border-width: 1.5px;
+        flex: 0 0 auto;
     }
     .header-btn {
-        padding: 2px 5px;
-        font-size: 10px;
+        padding: 2px 6px;
+        font-size: 10.5px;
+        border-radius: 6px;
+        border-width: 1.5px;
+        flex: 0 0 auto;
     }
     .hud-overlay {
         top: 3px;
-        left: 3px;
-        right: 3px;
+        left: 4px;
+        right: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         gap: 3px;
     }
     .health-container {
         padding: 2px 4px;
-        gap: 3px;
-        border-radius: 6px;
+        gap: 2.5px;
+        border-radius: 5px;
+        border-width: 1.5px;
+    }
+    .health-container .hud-icon {
+        font-size: 12px !important;
     }
     .health-bar-bg {
-        width: 45px;
-        height: 8px;
+        width: 36px;
+        height: 6px;
+        border-width: 1px;
+        border-radius: 3px;
     }
     .health-text {
-        font-size: 9px;
+        font-size: 8.5px;
+        font-weight: 800;
     }
     .wave-progress-container {
         padding: 2px 4px;
-        gap: 3px;
-        border-radius: 6px;
+        gap: 2.5px;
+        border-radius: 5px;
+        border-width: 1.5px;
+    }
+    .wave-progress-container .hud-icon {
+        font-size: 11px !important;
     }
     .wave-bar-bg {
-        width: 45px;
-        height: 7px;
+        width: 36px;
+        height: 6px;
+        border-width: 1px;
+        border-radius: 3px;
     }
     .speed-control-hud {
-        padding: 2px 4px;
-        font-size: 8.5px;
+        padding: 2px 5px;
         gap: 2px;
-        border-radius: 6px;
+        border-radius: 5px;
+        border-width: 1.5px;
+        cursor: pointer;
     }
-    .speed-slider-compact {
-        width: 28px;
+    .speed-label-text, .speed-slider-compact {
+        display: none !important;
+    }
+    .speed-icon-compact {
+        display: inline !important;
+        font-size: 10px;
+    }
+    #hudSpeedBadge {
+        font-size: 8.5px;
+        font-weight: 800;
     }
     .seed-tray-left {
-        left: 4px;
-        top: 28px;
+        left: 3px;
+        top: 26px;
         gap: 3px;
     }
     .seed-packet {
-        width: 36px;
-        height: 46px;
+        width: 34px;
+        height: 44px;
         border-radius: 5px;
         padding: 1px;
     }
     .seed-cost {
-        font-size: 7px;
+        font-size: 6.5px;
         padding: 0 2px;
     }
     .seed-avatar {
-        font-size: 16px;
+        font-size: 15px;
     }
     .seed-label {
-        font-size: 5.5px;
+        font-size: 5px;
     }
     .cooldown-overlay {
-        font-size: 7px;
+        font-size: 6.5px;
     }
     .multiples-target-badge {
-        font-size: 11px;
-        padding: 3px 8px;
-        top: 32px;
+        font-size: 10px;
+        padding: 2px 6px;
+        top: 28px;
     }
     .game-container {
         border-width: 2px;

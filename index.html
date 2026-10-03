@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1b3a1a">
     <title>Plants vs. Math: Multiplication Lawn Defense</title>
-    <link rel="stylesheet" href="css/style.css?v=3.0">
+    <link rel="stylesheet" href="css/style.css?v=4.0">
 </head>
 <body>
 
@@ -30,13 +30,15 @@
             </div>
             <div class="stat-badge" title="Current Streak (5+ = Fire Pea, 10+ = Ice Pea!)">
                 <span class="stat-icon">🔥</span>
-                <span>Streak: <span id="hudStreak">0</span></span>
+                <span><span class="stat-word-label">Streak: </span><span id="hudStreak">0</span></span>
             </div>
             <div class="stat-badge" title="Wave Number">
                 <span class="stat-icon">🚩</span>
-                <span>Wave <span id="hudWave">1/5</span></span>
+                <span><span class="stat-word-label">Wave </span><span id="hudWave">1/5</span></span>
             </div>
-            <button id="muteBtn" class="header-btn" title="Toggle Sound & Music">🔊 Sound</button>
+            <button id="muteBtn" class="header-btn" title="Toggle Sound & Music">
+                <span id="muteIcon">🔊</span><span class="btn-word-label"> Sound</span>
+            </button>
             <button id="pauseBtn" class="header-btn" title="Pause Game">⏸️</button>
             <button id="reportBtn" class="header-btn hidden" style="display: none;" title="View Multiplication Report Card">📊 Report</button>
         </div>
@@ -71,7 +73,7 @@
         <div class="hud-overlay">
             <!-- Plant Health Bar -->
             <div class="health-container" title="Defense Health">
-                <span style="font-size: 18px;">🛡️</span>
+                <span class="hud-icon">🛡️</span>
                 <div class="health-bar-bg">
                     <div id="healthFill" class="health-bar-fill"></div>
                 </div>
@@ -80,16 +82,17 @@
 
             <!-- Wave Progress Bar -->
             <div class="wave-progress-container" title="Wave Zombie Progress">
-                <span style="font-size: 16px;">🧟</span>
+                <span class="hud-icon">🧟</span>
                 <div class="wave-bar-bg">
                     <div id="waveProgressBar" class="wave-bar-fill"></div>
                 </div>
-                <span style="font-size: 14px;">🏁</span>
+                <span class="hud-icon">🏁</span>
             </div>
 
             <!-- In-game Speed Throttle Badge & Slider -->
-            <div class="speed-control-hud" title="Adjust Zombie Walk Speed in Real-Time">
-                <span>⚡ Speed:</span>
+            <div class="speed-control-hud" title="Adjust Zombie Walk Speed in Real-Time (Tap to cycle on mobile)">
+                <span class="speed-label-text">⚡ Speed:</span>
+                <span class="speed-icon-compact">⚡</span>
                 <input type="range" id="hudSpeedSlider" class="speed-slider-compact" min="0.35" max="1.8" step="0.05" value="0.5">
                 <span id="hudSpeedBadge">0.5x</span>
             </div>
@@ -298,10 +301,10 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/audio.js?v=3.0"></script>
-    <script src="js/mathEngine.js?v=3.0"></script>
-    <script src="js/entities.js?v=3.0"></script>
-    <script src="js/game.js?v=3.0"></script>
-    <script src="js/ui.js?v=3.0"></script>
+    <script src="js/audio.js?v=4.0"></script>
+    <script src="js/mathEngine.js?v=4.0"></script>
+    <script src="js/entities.js?v=4.0"></script>
+    <script src="js/game.js?v=4.0"></script>
+    <script src="js/ui.js?v=4.0"></script>
 </body>
 </html>
