@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1b3a1a">
     <title>Plants vs. Math: Multiplication Lawn Defense</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -38,8 +42,9 @@
         </div>
     </header>
 
-    <!-- Main Game Playfield Container -->
-    <main class="game-container">
+    <div class="game-playfield-wrap">
+        <!-- Main Game Playfield Container -->
+        <main class="game-container">
         <!-- PvZ Seed Packet Tray on Left -->
         <div class="seed-tray-left">
             <div id="potatoMineSeed" class="seed-packet disabled" title="Potato Mine (Cost: 3 ☀️) - Click here, then click a cell in any zombie lane to plant a land mine!">
@@ -134,6 +139,7 @@
             <button class="keypad-btn fire-btn" data-val="enter" style="grid-column: span 2;" title="Fire Pellet!">FIRE 🎯</button>
         </div>
     </section>
+    </div>
 
     <!-- Helpful Keyboard Guidance for 5th Grader -->
     <footer class="help-footer">

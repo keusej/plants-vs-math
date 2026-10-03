@@ -140,21 +140,41 @@ class MathDefenseGame {
             }
         });
 
-        // Mouse Move on Canvas for Cherry Bomb placement preview
-        this.canvas.addEventListener('mousemove', (e) => {
+        // Mouse & Touch tracking on Canvas for placement previews
+        const updateCoords = (clientX, clientY) => {
             const rect = this.canvas.getBoundingClientRect();
             const scaleX = this.baseWidth / rect.width;
             const scaleY = this.baseHeight / rect.height;
-            this.mouseX = (e.clientX - rect.left) * scaleX;
-            this.mouseY = (e.clientY - rect.top) * scaleY;
+            this.mouseX = (clientX - rect.left) * scaleX;
+            this.mouseY = (clientY - rect.top) * scaleY;
             this.isMouseOnCanvas = true;
+        };
+
+        this.canvas.addEventListener('mousemove', (e) => {
+            updateCoords(e.clientX, e.clientY);
         });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            if (e.touches && e.touches.length > 0) {
+                updateCoords(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        this.canvas.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches.length > 0) {
+                updateCoords(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
 
         this.canvas.addEventListener('mouseleave', () => {
             this.isMouseOnCanvas = false;
         });
 
-        // Mouse Click on Canvas: Collect Sun or Plant Cherry Bomb
+        this.canvas.addEventListener('touchend', () => {
+            setTimeout(() => { this.isMouseOnCanvas = false; }, 350);
+        }, { passive: true });
+
+        // Mouse Click / Tap on Canvas: Collect Sun or Plant Defense
         this.canvas.addEventListener('click', (e) => {
             if (this.gameState !== 'playing') return;
 
@@ -357,6 +377,10 @@ class MathDefenseGame {
         // On-screen Numpad Keys
         document.querySelectorAll('.keypad-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                // Subtle tactile haptic pulse on mobile devices
+                if (window.navigator?.vibrate) {
+                    try { window.navigator.vibrate(12); } catch (_) {}
+                }
                 const val = btn.getAttribute('data-val');
                 if (val === 'enter') {
                     this.submitAnswer();
