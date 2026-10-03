@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Plants vs. Math: Multiplication Lawn Defense</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Header Navigation & Overall Stats -->
+    <header class="game-header">
+        <div class="logo-area">
+            <span class="logo-icon">🌻</span>
+            <h1 id="headerGameTitle" class="game-title">Plants vs. Math: Times Tables</h1>
+        </div>
+
+        <div class="top-stats">
+            <div class="stat-badge" title="Current Score">
+                <span class="stat-icon">🪙</span>
+                <span id="hudScore">0</span>
+            </div>
+            <div class="stat-badge" style="border-color: #ffd54f;" title="Sun Points - Collect Sun to buy Potato Mines (3 ☀️) and Cherry Bombs (8 ☀️)!">
+                <span class="stat-icon">☀️</span>
+                <span id="hudSun">0</span>
+            </div>
+            <div class="stat-badge" title="Current Streak (5+ = Fire Pea, 10+ = Ice Pea!)">
+                <span class="stat-icon">🔥</span>
+                <span>Streak: <span id="hudStreak">0</span></span>
+            </div>
+            <div class="stat-badge" title="Wave Number">
+                <span class="stat-icon">🚩</span>
+                <span>Wave <span id="hudWave">1/5</span></span>
+            </div>
+            <button id="muteBtn" class="header-btn" title="Toggle Sound & Music">🔊 Sound</button>
+            <button id="pauseBtn" class="header-btn" title="Pause Game">⏸️</button>
+            <button id="reportBtn" class="header-btn hidden" style="display: none;" title="View Multiplication Report Card">📊 Report</button>
+        </div>
+    </header>
+
+    <!-- Main Game Playfield Container -->
+    <main class="game-container">
+        <!-- PvZ Seed Packet Tray on Left -->
+        <div class="seed-tray-left">
+            <div id="potatoMineSeed" class="seed-packet disabled" title="Potato Mine (Cost: 3 ☀️) - Click here, then click a cell in any zombie lane to plant a land mine!">
+                <div class="seed-cost">☀️ 3</div>
+                <div class="seed-avatar">🥔</div>
+                <div class="seed-label">POTATO</div>
+                <div id="potatoCooldownOverlay" class="cooldown-overlay">0/3 ☀️</div>
+            </div>
+            <div id="repeaterSeed" class="seed-packet disabled" title="Double Shot Repeater (Cost: 5 ☀️) - Click here, then click any Peashooter to upgrade it to shoot double shots!">
+                <div class="seed-cost">☀️ 5</div>
+                <div class="seed-avatar">🌿</div>
+                <div class="seed-label">DOUBLE</div>
+                <div id="repeaterCooldownOverlay" class="cooldown-overlay">0/5 ☀️</div>
+            </div>
+            <div id="cherryBombSeed" class="seed-packet disabled" title="Cherry Bomb (Cost: 8 ☀️) - Click here, then click anywhere on the lawn to plant and blast zombies!">
+                <div class="seed-cost">☀️ 8</div>
+                <div class="seed-avatar">🍒</div>
+                <div class="seed-label">CHERRY</div>
+                <div id="cherryCooldownOverlay" class="cooldown-overlay">0/8 ☀️</div>
+            </div>
+        </div>
+
+        <!-- In-Game HUD Overlays -->
+        <div class="hud-overlay">
+            <!-- Plant Health Bar -->
+            <div class="health-container" title="Defense Health">
+                <span style="font-size: 18px;">🛡️</span>
+                <div class="health-bar-bg">
+                    <div id="healthFill" class="health-bar-fill"></div>
+                </div>
+                <span id="healthText" class="health-text">100%</span>
+            </div>
+
+            <!-- Wave Progress Bar -->
+            <div class="wave-progress-container" title="Wave Zombie Progress">
+                <span style="font-size: 16px;">🧟</span>
+                <div class="wave-bar-bg">
+                    <div id="waveProgressBar" class="wave-bar-fill"></div>
+                </div>
+                <span style="font-size: 14px;">🏁</span>
+            </div>
+
+            <!-- In-game Speed Throttle Badge & Slider -->
+            <div class="speed-control-hud" title="Adjust Zombie Walk Speed in Real-Time">
+                <span>⚡ Speed:</span>
+                <input type="range" id="hudSpeedSlider" class="speed-slider-compact" min="0.35" max="1.8" step="0.05" value="0.5">
+                <span id="hudSpeedBadge">0.5x</span>
+            </div>
+        </div>
+
+        <!-- Sun Multiples Target Banner (Active during Multiples Mode) -->
+        <div id="multiplesTargetHud" class="multiples-target-badge hidden">
+            ⭐ COLLECT MULTIPLES OF <span id="targetMultipleNum">2</span>! ⭐
+        </div>
+
+        <!-- 60FPS High Performance Canvas -->
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+        <!-- Wave Announcement Banner -->
+        <div id="waveBanner" class="wave-banner hidden">Wave 1! Defend the Lawn!</div>
+    </main>
+
+    <!-- Flashcard & Interactive Input Area -->
+    <section class="flashcard-panel">
+        <!-- Flashcard Prompt & Answer Box -->
+        <div id="flashCardContainer" class="card-display-box">
+            <div id="problemDisplay" class="problem-text">
+                7 <span class="math-op">&times;</span> 8 = <span class="math-target">?</span>
+            </div>
+            <div id="answerInput" class="answer-input-slot">_</div>
+            <div id="hintBox" class="hint-box hidden"></div>
+        </div>
+
+        <!-- Tactile On-Screen Keypad (Great for Touchscreens, iPads, Mouse) -->
+        <div class="keypad-grid">
+            <button class="keypad-btn" data-val="1">1</button>
+            <button class="keypad-btn" data-val="2">2</button>
+            <button class="keypad-btn" data-val="3">3</button>
+            <button class="keypad-btn action-btn" data-val="clear" title="Clear">C</button>
+
+            <button class="keypad-btn" data-val="4">4</button>
+            <button class="keypad-btn" data-val="5">5</button>
+            <button class="keypad-btn" data-val="6">6</button>
+            <button class="keypad-btn action-btn" data-val="backspace" title="Backspace">⌫</button>
+
+            <button class="keypad-btn" data-val="7">7</button>
+            <button class="keypad-btn" data-val="8">8</button>
+            <button class="keypad-btn" data-val="9">9</button>
+            <button class="keypad-btn action-btn" id="hintBtn" title="Strategy Hint">💡</button>
+
+            <button class="keypad-btn" data-val="0" style="grid-column: span 2;">0</button>
+            <button class="keypad-btn fire-btn" data-val="enter" style="grid-column: span 2;" title="Fire Pellet!">FIRE 🎯</button>
+        </div>
+    </section>
+
+    <!-- Helpful Keyboard Guidance for 5th Grader -->
+    <footer class="help-footer">
+        <span>💡 Keyboard: Type numbers directly on your keyboard or numpad. Auto-fires on correct answer!</span>
+        <span><span class="keyboard-hint">ESC</span> Pause | <span class="keyboard-hint">BACKSPACE</span> Clear</span>
+    </footer>
+
+    <!-- ==============================================
+         MODALS & MENUS
+         ============================================== -->
+
+    <!-- 1. Start Menu / Settings Modal -->
+    <div id="startModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">🌻 Plants vs. Math 🧟</h2>
+            <p class="modal-subtitle">
+                Zombies are walking down your lawn! Answer math flash cards quickly to shoot pellets and defeat them before they reach your plants!
+            </p>
+
+            <!-- Math Operation Selection (Multi-select any combination) -->
+            <div class="section-label">Select Math Operations (Choose Any Combination)</div>
+            <div class="math-op-group" id="operationToggleGroup">
+                <button class="op-btn active" data-op="addition">➕ Addition (+)</button>
+                <button class="op-btn active" data-op="subtraction">➖ Subtraction (−)</button>
+                <button class="op-btn active" data-op="multiplication">✖️ Multiplication (×)</button>
+                <button class="op-btn active" data-op="division">➗ Division (÷)</button>
+            </div>
+
+            <!-- Sun Drop Mode Selection -->
+            <div class="section-label">Sun Drop Game Mode</div>
+            <div class="game-mode-group" id="gameModeToggleGroup">
+                <button class="gamemode-btn active" data-mode="classic" id="modeClassicBtn">🌻 Classic Sun Drops</button>
+                <button class="gamemode-btn" data-mode="multiples" id="modeMultiplesBtn">⭐ Multiples Sun Catcher</button>
+            </div>
+            <div id="modeDescription" class="mode-desc-hint">
+                🌻 <strong>Classic Mode:</strong> Defeated zombies drop standard sun orbs to buy Cherry Bombs.
+            </div>
+
+            <!-- Table Selection Section -->
+            <div id="tableSectionLabel" class="section-label">Select Tables to Practice (1 to 12)</div>
+            <div class="table-presets">
+                <button class="preset-chip" id="presetAll">All (1-12)</button>
+                <button class="preset-chip" id="presetBeginner">Easy (1, 2, 5, 10)</button>
+                <button class="preset-chip" id="presetHard">Tricky (6, 7, 8, 9, 12)</button>
+            </div>
+            <div class="table-buttons-grid" id="tableSelectorGrid">
+                <!-- Buttons 1 to 12 dynamically populated or static -->
+            </div>
+
+            <!-- Zombie Speed Throttle / Difficulty -->
+            <div class="section-label">Zombie Walk Speed (Difficulty Throttle)</div>
+            <div class="speed-preset-group">
+                <button class="speed-preset-btn active" data-speed="0.5">🐌 Snail (0.5x)</button>
+                <button class="speed-preset-btn" data-speed="0.75">🚶 Steady (0.75x)</button>
+                <button class="speed-preset-btn" data-speed="1.0">🏃 Brisk (1.0x)</button>
+                <button class="speed-preset-btn" data-speed="1.35">⚡ Fast (1.35x)</button>
+            </div>
+            <div class="slider-container">
+                <input type="range" id="speedSlider" class="large-slider" min="0.35" max="1.8" step="0.05" value="0.5">
+                <span id="speedDisplay" class="speed-readout">0.50x (🐌 Snail Pace)</span>
+            </div>
+
+            <button id="startPlayBtn" class="btn-primary">DEFEND THE LAWN! 🌿</button>
+        </div>
+    </div>
+
+    <!-- 2. Wave Victory Modal -->
+    <div id="victoryModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="modal-title">🎉 Lawn Defended! 🎉</h2>
+            <div id="victoryStars" class="stars-rating">⭐⭐⭐</div>
+            <p id="victorySubtitle" class="modal-subtitle">You crushed Wave <span id="victoryWaveNum">1</span> with quick math recall!</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div id="victoryScore" class="stat-value">0</div>
+                    <div class="stat-label">Final Score</div>
+                </div>
+                <div class="stat-card">
+                    <div id="victoryHealth" class="stat-value">100%</div>
+                    <div class="stat-label">Lawn Health</div>
+                </div>
+                <div class="stat-card">
+                    <div id="victoryHits" class="stat-value">0</div>
+                    <div class="stat-label">Hits Taken</div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 12px;">
+                <button id="nextWaveBtn" class="btn-primary">NEXT WAVE ➡️</button>
+                <button id="victoryReportBtn" class="btn-secondary hidden" style="display: none;">View Stats 📊</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Game Over Modal -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="gameOverTitle" class="modal-title" style="color: #FF5252;">THE ZOMBIES ATE YOUR BRAINS! 🧟</h2>
+            <p id="gameOverSubtitle" class="modal-subtitle">Don't give up! Faster math answers knock the zombies back and defeat them in time.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div id="gameOverScore" class="stat-value">0</div>
+                    <div class="stat-label">Final Score</div>
+                </div>
+                <div class="stat-card">
+                    <div id="gameOverQuestions" class="stat-value">0</div>
+                    <div class="stat-label">Problems Solved</div>
+                </div>
+                <div class="stat-card">
+                    <div id="gameOverHits" class="stat-value">0</div>
+                    <div class="stat-label">Hits Taken</div>
+                </div>
+            </div>
+
+            <!-- Tip to lower speed if needed -->
+            <div style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 10px; margin-bottom: 15px; font-size: 14px; color: #FFF9C4;">
+                💡 <strong>Tip:</strong> If the zombies are coming too fast, try setting the speed to 🐌 <strong>Snail (0.5x)</strong> or <strong>0.7x</strong> in settings!
+            </div>
+
+            <button id="retryBtn" class="btn-primary">TRY AGAIN 🌻</button>
+        </div>
+    </div>
+
+    <!-- 4. Pause Modal -->
+    <div id="pauseModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="modal-title">⏸️ Game Paused</h2>
+            
+            <div class="section-label">Adjust Zombie Walk Speed Live</div>
+            <div class="slider-container">
+                <input type="range" id="pauseSpeedSlider" class="large-slider" min="0.35" max="1.8" step="0.05" value="0.5">
+                <span id="pauseSpeedDisplay" class="speed-readout">0.50x</span>
+            </div>
+
+            <button id="resumeBtn" class="btn-primary" style="margin-bottom: 10px;">RESUME GAME ▶️</button>
+            <br>
+            <button id="restartBtn" class="btn-secondary">Change Tables / Restart 🔄</button>
+        </div>
+    </div>
+
+    <!-- 5. Math Mastery Report Card Modal -->
+    <div id="reportModal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 640px;">
+            <h2 id="reportModalTitle" class="modal-title">📊 Math Mastery Report Card</h2>
+            <p id="reportModalSubtitle" class="modal-subtitle">Track your accuracy across each fact table (1 through 12):</p>
+
+            <div id="reportCardGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+                <!-- Dynamically populated report badges -->
+            </div>
+
+            <button id="closeReportBtn" class="btn-primary">BACK TO GAME</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/mathEngine.js"></script>
+    <script src="js/entities.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+</body>
+</html>
