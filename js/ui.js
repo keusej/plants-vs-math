@@ -221,6 +221,38 @@ document.addEventListener('DOMContentLoaded', () => {
     updateOperationsUI();
     updateGameModeUI('classic');
 
+    // Starting Level Selector (Defaults to Level 1)
+    let selectedStartingLevel = 1;
+    const levelBtns = document.querySelectorAll('.level-btn');
+    const levelDesc = document.getElementById('levelDescription');
+    const levelDescriptions = {
+        1: "🌱 <strong>Level 1:</strong> Gentle introduction with 4 standard walkers. Great for warming up!",
+        2: "🚩 <strong>Level 2:</strong> Flag Zombie leads the assault, introducing Conehead Zombies!",
+        3: "🛡️ <strong>Level 3:</strong> Faster assault with mixed Conehead squads and Flag bearer.",
+        4: "🪣 <strong>Level 4:</strong> Heavy Buckethead Zombies arrive! Tough metal armor takes multiple hits.",
+        5: "👑 <strong>Level 5 (BOSS BATTLE):</strong> Giant Gargantuar Zombie stomps the lawn and hurls Imps!",
+        6: "⚡ <strong>Level 6:</strong> Rapid mixed wave with swift spawns and high zombie density.",
+        7: "🧟 <strong>Level 7:</strong> Armored brigade! Multiple Bucketheads and Coneheads marching in force.",
+        8: "🔥 <strong>Level 8:</strong> Intense onslaught requiring fast math recall and heavy lawn defenses.",
+        9: "💀 <strong>Level 9:</strong> Massive swarm of tough zombies storming every lawn lane!",
+        10: "👑 <strong>Level 10 (MEGA BOSS):</strong> Ultimate Gargantuar showdown with armored escort horde!"
+    };
+
+    levelBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.blur();
+            if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                document.activeElement.blur();
+            }
+            levelBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedStartingLevel = parseInt(btn.dataset.level, 10) || 1;
+            if (levelDesc && levelDescriptions[selectedStartingLevel]) {
+                levelDesc.innerHTML = levelDescriptions[selectedStartingLevel];
+            }
+        });
+    });
+
     // Start Game Button
     const startBtn = document.getElementById('startPlayBtn');
     const onStart = () => {
@@ -228,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.mathEngine.setOperations(selectedOperations);
         window.mathEngine.setTables(selectedTables);
         window.game.setSunMultiplesMode(sunMultiplesMode);
-        window.game.startGame(1);
+        window.game.startGame(selectedStartingLevel, true);
     };
     startBtn?.addEventListener('click', onStart);
     startBtn?.addEventListener('touchend', () => { window.soundEffects.unlock(); }, { passive: true });
@@ -238,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const onNext = () => {
         window.soundEffects.unlock();
         const nextWave = (window.game.currentWave || 1) + 1;
-        window.game.startGame(nextWave);
+        window.game.startGame(nextWave, false);
     };
     nextBtn?.addEventListener('click', onNext);
     nextBtn?.addEventListener('touchend', () => { window.soundEffects.unlock(); }, { passive: true });
@@ -247,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const retryBtn = document.getElementById('retryBtn');
     const onRetry = () => {
         window.soundEffects.unlock();
-        window.game.startGame(1);
+        window.game.startGame(selectedStartingLevel || 1, true);
     };
     retryBtn?.addEventListener('click', onRetry);
     retryBtn?.addEventListener('touchend', () => { window.soundEffects.unlock(); }, { passive: true });

@@ -1626,6 +1626,58 @@ canvas#gameCanvas {
     margin-bottom: 6px;
 }
 
+/* Starting Level Selector in Start Modal */
+.level-select-group {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.level-btn {
+    background: #263238;
+    border: 2px solid #546E7A;
+    border-radius: 12px;
+    padding: 7px 12px;
+    color: #ECEFF1;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 3px 0 #1b262c;
+}
+
+.level-btn:hover {
+    transform: translateY(-2px);
+    border-color: #81C784;
+    color: #FFF;
+}
+
+.level-btn.active {
+    background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%);
+    border-color: #C8E6C9;
+    color: #FFF;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5), 0 3px 0 #1B5E20;
+}
+
+.level-btn.boss-level-btn {
+    border-color: #EF5350;
+    color: #FFCDD2;
+}
+
+.level-btn.boss-level-btn:hover {
+    border-color: #FFEB3B;
+    color: #FFF;
+}
+
+.level-btn.boss-level-btn.active {
+    background: linear-gradient(180deg, #E53935 0%, #B71C1C 100%);
+    border-color: #FFEB3B;
+    color: #FFF;
+    box-shadow: 0 0 12px rgba(229, 57, 53, 0.6), 0 3px 0 #7F0000;
+}
+
 /* Modals Mobile Scaling */
 @media (max-width: 768px) {
     .modal-content {
@@ -1651,6 +1703,10 @@ canvas#gameCanvas {
     }
     .operation-card {
         padding: 6px 4px;
+        font-size: 12px;
+    }
+    .level-btn {
+        padding: 5px 8px;
         font-size: 12px;
     }
     .btn-primary, .btn-secondary {

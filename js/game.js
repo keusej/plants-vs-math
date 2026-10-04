@@ -531,14 +531,16 @@ class MathDefenseGame {
         if (hudBadge) hudBadge.textContent = `${this.speedMultiplier.toFixed(2)}x`;
     }
 
-    startGame(wave = 1) {
+    startGame(wave = 1, isNewSession = false) {
         window.soundEffects.init();
         this.gameState = 'playing';
         this.currentWave = wave;
+        this.totalWaves = Math.max(5, Math.ceil(this.currentWave / 5) * 5);
         this.plantHealth = this.maxPlantHealth;
-        if (wave === 1) {
-            this.sun = 0;
-            this.score = 0;
+        if (wave === 1 || isNewSession) {
+            // Starting sun & score allowance when skipping ahead to later levels
+            this.sun = Math.max(0, (wave - 1) * 2);
+            this.score = (wave - 1) * 350;
             this.potatoMines = [];
             window.mathEngine?.resetStats();
         } else {
