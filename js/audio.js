@@ -397,6 +397,78 @@ class SoundEffects {
         this.playNoise(0.65, 0.9, 1200);
     }
 
+    // Super Hot Chili Pepper (Jalapeno) fuse & fiery sizzle
+    playChiliSizzle() {
+        if (!this.ready()) return;
+        const now = this.ctx.currentTime;
+
+        // Rising fiery saw tone with pitch bend
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 1.0);
+
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(this.sfxVolume * 0.75, now + 0.6);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.05);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 1.05);
+
+        // Crackling fiery hiss
+        this.playNoise(1.0, 0.5, 2400);
+    }
+
+    // Super Hot Chili Pepper screen-clearing inferno blast!
+    playChiliExplode() {
+        if (!this.ready()) return;
+        const now = this.ctx.currentTime;
+
+        // Massive seismic sub-thump
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(180, now);
+        osc1.frequency.exponentialRampToValueAtTime(20, now + 0.95);
+
+        gain1.gain.setValueAtTime(this.sfxVolume * 1.0, now);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.95);
+
+        osc1.connect(gain1);
+        gain1.connect(this.ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.95);
+
+        // Distorted roaring saw wave for fire blast
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(360, now);
+        filter.frequency.linearRampToValueAtTime(110, now + 0.85);
+
+        osc2.type = 'sawtooth';
+        osc2.frequency.setValueAtTime(95, now);
+        osc2.frequency.exponentialRampToValueAtTime(28, now + 0.9);
+
+        gain2.gain.setValueAtTime(this.sfxVolume * 0.9, now);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
+
+        osc2.connect(filter);
+        filter.connect(gain2);
+        gain2.connect(this.ctx.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.9);
+
+        // Huge firestorm noise roar
+        this.playNoise(1.0, 1.0, 1600);
+    }
+
     // Plant placement thud (Potato Mine or other plants)
     playPlant() {
         if (!this.ready()) return;

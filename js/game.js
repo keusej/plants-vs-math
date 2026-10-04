@@ -44,6 +44,7 @@ class MathDefenseGame {
         this.sun = 0;
         this.suns = [];
         this.cherryBombs = [];
+        this.chiliPeppers = [];
         this.potatoMines = [];
         this.selectedSeed = null;
         this.mouseX = 0;
@@ -328,6 +329,25 @@ class MathDefenseGame {
                 }
                 return;
             }
+
+            // 4. If Super Hot Chili Pepper is selected, plant it on the lawn!
+            if (this.selectedSeed === 'chilipepper') {
+                if (this.sun >= 12) {
+                    this.sun -= 12;
+                    const cp = new ChiliPepper(clickX, clickY);
+                    this.chiliPeppers.push(cp);
+                    window.soundEffects.playChiliSizzle();
+                    this.particles.addFloatingText('🌶️ Chili Pepper Planted!', clickX, clickY - 30, '#FF3D00', 22);
+                    this.selectedSeed = null;
+                    this.updateHUD();
+                } else {
+                    window.soundEffects.playWrong();
+                    this.particles.addFloatingText('Need 12 Sun!', clickX, clickY - 30, '#FFD54F', 20);
+                    this.selectedSeed = null;
+                    this.updateHUD();
+                }
+                return;
+            }
         });
 
         // Right-click cancels Seed placement
@@ -386,6 +406,23 @@ class MathDefenseGame {
                     cherryCard.classList.add('shake-card');
                     setTimeout(() => cherryCard.classList.remove('shake-card'), 400);
                     this.particles.addFloatingText(`Need 8 ☀️! (Have ${this.sun})`, 130, 110, '#FFD54F', 18);
+                }
+            });
+        }
+
+        // Super Hot Chili Pepper Seed Card click handler (Cost: 12 ☀️)
+        const chiliCard = document.getElementById('chiliPepperSeed');
+        if (chiliCard) {
+            chiliCard.addEventListener('click', () => {
+                if (this.gameState !== 'playing') return;
+                if (this.sun >= 12) {
+                    this.selectedSeed = (this.selectedSeed === 'chilipepper' ? null : 'chilipepper');
+                    this.updateHUD();
+                } else {
+                    window.soundEffects.playWrong();
+                    chiliCard.classList.add('shake-card');
+                    setTimeout(() => chiliCard.classList.remove('shake-card'), 400);
+                    this.particles.addFloatingText(`Need 12 ☀️! (Have ${this.sun})`, 130, 135, '#FFD54F', 18);
                 }
             });
         }
@@ -467,6 +504,7 @@ class MathDefenseGame {
         }
         this.suns = [];
         this.cherryBombs = [];
+        this.chiliPeppers = [];
         this.selectedSeed = null;
         this.allMowersDeployed = false;
         this.waveHitsTaken = 0;
@@ -1097,6 +1135,40 @@ class MathDefenseGame {
             }
         }
 
+        // Update Super Hot Chili Peppers (Jalapeno Board Wipe)
+        for (let i = this.chiliPeppers.length - 1; i >= 0; i--) {
+            const cp = this.chiliPeppers[i];
+            cp.update(dt);
+
+            if (cp.isExploded && !cp.dead) {
+                cp.dead = true;
+                this.screenShake = 35; // Heavy seismic board-clearing shake
+                window.soundEffects.playChiliExplode();
+                this.particles.addChiliInferno(this.laneHeights, this.mowerX, this.baseWidth);
+
+                // Blast and incinerate ALL active zombies across the entire board!
+                for (const z of this.zombies) {
+                    if (!z.isDead) {
+                        const hitResult = z.takeHit(999, false, true); // true forces lethal damage even on boss!
+                        if (hitResult.killed) {
+                            this.waveKilledZombies++;
+                            if (z.isBoss) {
+                                this.score += 2000;
+                                window.soundEffects.playVictory();
+                                this.particles.addFloatingText('BOSS INCINERATED! +2000', z.x, z.y - 50, '#FFD700', 32);
+                            } else {
+                                this.score += 350;
+                                this.particles.addFloatingText('+350', z.x, z.y - 20, '#FF5722', 22);
+                            }
+                            // Fiery explosion at each incinerated zombie
+                            this.particles.addExplosion(z.x, z.y, 75);
+                        }
+                    }
+                }
+                this.chiliPeppers.splice(i, 1);
+            }
+        }
+
         // Update Potato Mines (Single-target detonation on step!)
         for (let i = this.potatoMines.length - 1; i >= 0; i--) {
             const mine = this.potatoMines[i];
@@ -1311,6 +1383,11 @@ class MathDefenseGame {
             cb.render(ctx);
         }
 
+        // 2.55 Draw Chili Peppers on lawn
+        for (const cp of this.chiliPeppers) {
+            cp.render(ctx);
+        }
+
         // 2.6 Draw Potato Mines on lawn
         for (const pm of this.potatoMines) {
             pm.render(ctx);
@@ -1378,6 +1455,56 @@ class MathDefenseGame {
             // Ghost Cherry Bomb
             ctx.globalAlpha = 0.8;
             const ghost = new CherryBomb(this.mouseX, this.mouseY);
+            ghost.render(ctx);
+            ctx.restore();
+        }
+
+        // 6.55 Draw Chili Pepper Placement Preview / Ghost & Screen Inferno Indicator
+        if (this.selectedSeed === 'chilipepper' && this.isMouseOnCanvas) {
+            ctx.save();
+            // Full lawn inferno danger zone indicator
+            const lawnLeft = this.defenseX - 70;
+            const lawnTop = 130;
+            const lawnWidth = this.baseWidth - lawnLeft - 10;
+            const lawnHeight = this.baseHeight - lawnTop;
+
+            ctx.strokeStyle = 'rgba(255, 61, 0, 0.75)';
+            ctx.fillStyle = 'rgba(255, 87, 34, 0.09)';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([12, 8]);
+            ctx.strokeRect(lawnLeft, lawnTop, lawnWidth, lawnHeight);
+            ctx.fillRect(lawnLeft, lawnTop, lawnWidth, lawnHeight);
+
+            // Target ring at cursor
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#FF1744';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(this.mouseX, this.mouseY, 44, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Crosshairs
+            ctx.strokeStyle = '#FF5722';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(this.mouseX - 22, this.mouseY);
+            ctx.lineTo(this.mouseX + 22, this.mouseY);
+            ctx.moveTo(this.mouseX, this.mouseY - 22);
+            ctx.lineTo(this.mouseX, this.mouseY + 22);
+            ctx.stroke();
+
+            // Target banner under cursor
+            ctx.font = 'bold 13px "Segoe UI", Arial, sans-serif';
+            ctx.fillStyle = '#FFD600';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
+            ctx.textAlign = 'center';
+            ctx.strokeText('🔥 BOARD WIPE INFERNO 🔥', this.mouseX, this.mouseY + 54);
+            ctx.fillText('🔥 BOARD WIPE INFERNO 🔥', this.mouseX, this.mouseY + 54);
+
+            // Ghost Chili Pepper
+            ctx.globalAlpha = 0.85;
+            const ghost = new ChiliPepper(this.mouseX, this.mouseY);
             ghost.render(ctx);
             ctx.restore();
         }
@@ -1761,6 +1888,32 @@ class MathDefenseGame {
                     const pctMissing = Math.round(((8 - this.sun) / 8) * 100);
                     cooldownOverlay.style.height = `${pctMissing}%`;
                     cooldownOverlay.textContent = `${this.sun}/8 ☀️`;
+                }
+            }
+        }
+
+        // Super Hot Chili Pepper Seed Card State (Cost: 12 ☀️)
+        const chiliCard = document.getElementById('chiliPepperSeed');
+        const chiliOverlay = document.getElementById('chiliCooldownOverlay');
+        if (chiliCard) {
+            if (this.selectedSeed === 'chilipepper') {
+                chiliCard.className = 'seed-packet selected';
+                if (chiliOverlay) {
+                    chiliOverlay.style.height = '0%';
+                    chiliOverlay.textContent = 'PLANTING';
+                }
+            } else if (this.sun >= 12) {
+                chiliCard.className = 'seed-packet ready';
+                if (chiliOverlay) {
+                    chiliOverlay.style.height = '0%';
+                    chiliOverlay.textContent = 'READY!';
+                }
+            } else {
+                chiliCard.className = 'seed-packet disabled';
+                if (chiliOverlay) {
+                    const pctMissing = Math.round(((12 - this.sun) / 12) * 100);
+                    chiliOverlay.style.height = `${pctMissing}%`;
+                    chiliOverlay.textContent = `${this.sun}/12 ☀️`;
                 }
             }
         }

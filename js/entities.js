@@ -808,12 +808,12 @@ class BossZombie extends Zombie {
         this.impThrowPending = false;
     }
 
-    takeHit(damage, isIce = false, isMower = false) {
-        // Lawnmower is instant defeat; Cherry Bomb does 6 massive damage
-        const actualDamage = isMower ? 999 : (damage > 10 ? 6 : damage);
+    takeHit(damage, isIce = false, isLethal = false) {
+        // Lawnmower or Super Hot Chili Pepper is instant defeat; Cherry Bomb does 6 massive damage
+        const actualDamage = isLethal ? 999 : (damage > 10 ? 6 : damage);
         this.hp -= actualDamage;
         this.hitFlashTimer = 0.2;
-        this.x += (isMower ? 0 : 4); // Slight knockback
+        this.x += (isLethal ? 0 : 4); // Slight knockback
 
         if (isIce) {
             this.isFrozen = true;
@@ -1304,6 +1304,71 @@ class ParticleSystem {
         // Comic BOOM text!
         this.addFloatingText('💥 BOOM!', x, y - 20, '#FF1744', 36);
     }
+
+    // Super Hot Chili Pepper board-wide inferno explosion
+    addChiliInferno(laneHeights, startX = 130, endX = 1000) {
+        const centerX = (startX + endX) / 2;
+        const centerY = laneHeights[Math.floor(laneHeights.length / 2)] || 320;
+
+        // 1. Massive expanding shockwave rings centered across the battlefield
+        for (let i = 0; i < 4; i++) {
+            this.particles.push({
+                x: centerX,
+                y: centerY,
+                vx: 0,
+                vy: 0,
+                radius: 25 + i * 35,
+                maxRadius: 680,
+                color: i === 0 ? '#FFFFFF' : (i === 1 ? '#FFD54F' : (i === 2 ? '#FF5722' : '#FF1744')),
+                isRing: true,
+                alpha: 1.0,
+                life: 0.75,
+                maxLife: 0.75
+            });
+        }
+
+        // 2. Roaring fire pillars and flame tongues sweeping through all 5 lanes
+        laneHeights.forEach((laneY) => {
+            for (let x = startX + 30; x <= endX; x += 95) {
+                // Expanding fire blast ring on each lane position
+                this.particles.push({
+                    x: x,
+                    y: laneY,
+                    vx: 0,
+                    vy: 0,
+                    radius: 12,
+                    maxRadius: 95,
+                    color: '#FF5722',
+                    isRing: true,
+                    alpha: 0.95,
+                    life: 0.6,
+                    maxLife: 0.6
+                });
+
+                // Fiery flame sparks leaping upward
+                for (let p = 0; p < 7; p++) {
+                    const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.8;
+                    const speed = 80 + Math.random() * 220;
+                    const colors = ['#FFFFFF', '#FFEB3B', '#FF9800', '#FF3D00', '#D50000'];
+                    this.particles.push({
+                        x: x + (Math.random() - 0.5) * 35,
+                        y: laneY + (Math.random() - 0.5) * 18,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 60,
+                        radius: 5 + Math.random() * 8,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        alpha: 1.0,
+                        life: 0.55 + Math.random() * 0.4,
+                        maxLife: 0.95
+                    });
+                }
+            }
+        });
+
+        // 3. Comic fiery banner announcements
+        this.addFloatingText('🌶️🔥 JALAPENO INFERNO! 🔥🌶️', centerX, centerY - 80, '#FF3D00', 44);
+        this.addFloatingText('💥 ALL ZOMBIES INCINERATED! 💥', centerX, centerY - 30, '#FFD600', 28);
+    }
 }
 
 // ----------------------------------------------------
@@ -1682,6 +1747,210 @@ class CherryBomb {
         ctx.fillStyle = '#212121';
         ctx.fillRect(-5, 4, 10, 3);
         ctx.restore();
+
+        ctx.restore();
+    }
+}
+
+// ----------------------------------------------------
+// SUPER HOT CHILI PEPPER (JALAPENO SCREEN-CLEARING UPGRADE)
+// ----------------------------------------------------
+class ChiliPepper {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.timer = 0;
+        this.fuseTime = 1.0; // Detonates after 1.0 seconds
+        this.isExploded = false;
+        this.dead = false;
+        this.animPhase = 0;
+    }
+
+    update(dt) {
+        this.timer += dt;
+        this.animPhase += dt * 35; // Fast furious tremble
+        if (this.timer >= this.fuseTime && !this.isExploded) {
+            this.isExploded = true;
+        }
+    }
+
+    render(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        const progress = Math.min(1.0, this.timer / this.fuseTime);
+        const scale = 1.0 + progress * 0.55; // Swell dramatically up!
+        const shakeX = (Math.random() - 0.5) * (progress * 12);
+        const shakeY = (Math.random() - 0.5) * (progress * 12);
+
+        ctx.translate(shakeX, shakeY);
+        ctx.scale(scale, scale);
+
+        // Ground shadow (radiates heat)
+        ctx.fillStyle = progress > 0.5 ? 'rgba(255, 60, 0, 0.4)' : 'rgba(0, 0, 0, 0.35)';
+        ctx.beginPath();
+        ctx.ellipse(0, 26, 26, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Fiery heat aura when swelling
+        if (progress > 0.2) {
+            ctx.shadowColor = progress > 0.7 ? '#FFD600' : '#FF1744';
+            ctx.shadowBlur = 15 + progress * 25;
+        }
+
+        // Sizzling fiery sparks shooting from stem and body
+        if (progress > 0.1) {
+            const sparkCount = Math.floor(3 + progress * 6);
+            for (let i = 0; i < sparkCount; i++) {
+                const sAngle = Math.random() * Math.PI * 2;
+                const sDist = 10 + Math.random() * 22;
+                const sY = -15 + Math.sin(sAngle) * sDist;
+                const sX = Math.cos(sAngle) * (sDist * 0.6);
+                ctx.fillStyle = Math.random() > 0.5 ? '#FFF59D' : '#FF5722';
+                ctx.beginPath();
+                ctx.arc(sX, sY, 1.5 + Math.random() * 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Rising steam/smoke puffs
+        if (progress > 0.3) {
+            ctx.fillStyle = 'rgba(255, 235, 59, 0.35)';
+            ctx.beginPath();
+            ctx.arc((Math.sin(this.animPhase * 0.5) * 6), -34 - progress * 10, 5 + progress * 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Color shifting: vibrant chili red -> fiery bright orange -> flashing blazing yellow-white
+        const isFlashing = progress > 0.55 && Math.floor(this.animPhase) % 2 === 0;
+        let cBodyTop = '#FF1744';
+        let cBodyMid = '#D50000';
+        let cBodyBot = '#B71C1C';
+
+        if (isFlashing) {
+            cBodyTop = '#FFFF00';
+            cBodyMid = '#FF9100';
+            cBodyBot = '#FF3D00';
+        } else if (progress > 0.4) {
+            cBodyTop = '#FF5252';
+            cBodyMid = '#FF1744';
+            cBodyBot = '#C62828';
+        }
+
+        // Curved Pepper Body Path
+        ctx.beginPath();
+        ctx.moveTo(-13, -16);
+        ctx.bezierCurveTo(-22, -4, -18, 14, -3, 27);
+        ctx.quadraticCurveTo(2, 29, 4, 25);
+        ctx.bezierCurveTo(18, 12, 17, -4, 11, -16);
+        ctx.closePath();
+
+        const grad = ctx.createLinearGradient(-15, -16, 15, 25);
+        grad.addColorStop(0, cBodyTop);
+        grad.addColorStop(0.45, cBodyMid);
+        grad.addColorStop(1, cBodyBot);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.strokeStyle = isFlashing ? '#FFEA00' : '#880E4F';
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        // 3D Pepper highlight streak
+        ctx.strokeStyle = isFlashing ? '#FFFFFF' : 'rgba(255, 255, 255, 0.45)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(-9, -10);
+        ctx.bezierCurveTo(-14, -2, -12, 10, -3, 19);
+        ctx.stroke();
+
+        // Stem & Calyx (Green Leafy Cap on top)
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#2E7D32';
+        ctx.strokeStyle = '#1B5E20';
+        ctx.lineWidth = 2;
+
+        // Leafy cap prongs
+        ctx.beginPath();
+        ctx.moveTo(-14, -15);
+        ctx.lineTo(-7, -22);
+        ctx.lineTo(0, -16);
+        ctx.lineTo(7, -22);
+        ctx.lineTo(13, -15);
+        ctx.quadraticCurveTo(0, -12, -14, -15);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Stalk sticking up and curving left
+        ctx.beginPath();
+        ctx.moveTo(-1, -18);
+        ctx.quadraticCurveTo(-6, -28, -10, -31);
+        ctx.strokeStyle = '#33691E';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // Furious Angry Face!
+        const eyeY = -4;
+        ctx.fillStyle = '#FFFFFF';
+        // Left eye
+        ctx.beginPath();
+        ctx.ellipse(-5.5, eyeY, 4, 5, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Right eye
+        ctx.beginPath();
+        ctx.ellipse(4.5, eyeY, 4, 5, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Pupils - fiery focused glare
+        ctx.fillStyle = isFlashing ? '#D50000' : '#000000';
+        ctx.beginPath();
+        ctx.arc(-4.5, eyeY + 0.5, 2, 0, Math.PI * 2);
+        ctx.arc(3.5, eyeY + 0.5, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Furious V-shaped slanted Eyebrows
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2.8;
+        ctx.beginPath();
+        ctx.moveTo(-10.5, eyeY - 7);
+        ctx.lineTo(-2, eyeY - 3.5);
+        ctx.moveTo(9.5, eyeY - 7);
+        ctx.lineTo(1, eyeY - 3.5);
+        ctx.stroke();
+
+        // Clenched Teeth Grimace / Fiery Mouth
+        ctx.fillStyle = '#1B0000';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(-7, 7, 14, 6, 2);
+        } else {
+            ctx.rect(-7, 7, 14, 6);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        // Clenched white teeth dividers
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-6, 8, 12, 4);
+        ctx.strokeStyle = '#212121';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-6, 10);
+        ctx.lineTo(6, 10);
+        ctx.moveTo(-2, 8);
+        ctx.lineTo(-2, 12);
+        ctx.moveTo(2, 8);
+        ctx.lineTo(2, 12);
+        ctx.stroke();
 
         ctx.restore();
     }
