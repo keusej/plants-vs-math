@@ -230,12 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
         2: "🚩 <strong>Level 2:</strong> Flag Zombie leads the assault, introducing Conehead Zombies!",
         3: "🛡️ <strong>Level 3:</strong> Faster assault with mixed Conehead squads and Flag bearer.",
         4: "🪣 <strong>Level 4:</strong> Heavy Buckethead Zombies arrive! Tough metal armor takes multiple hits.",
-        5: "👑 <strong>Level 5 (BOSS BATTLE):</strong> Giant Gargantuar Zombie stomps the lawn and hurls Imps!",
+        5: "🧟 <strong>Level 5 (BOSS BATTLE):</strong> Giant Gargantuar Zombie stomps the lawn and hurls Imps!",
         6: "⚡ <strong>Level 6:</strong> Rapid mixed wave with swift spawns and high zombie density.",
         7: "🧟 <strong>Level 7:</strong> Armored brigade! Multiple Bucketheads and Coneheads marching in force.",
         8: "🔥 <strong>Level 8:</strong> Intense onslaught requiring fast math recall and heavy lawn defenses.",
         9: "💀 <strong>Level 9:</strong> Massive swarm of tough zombies storming every lawn lane!",
-        10: "👑 <strong>Level 10 (MEGA BOSS):</strong> Ultimate Gargantuar showdown with armored escort horde!"
+        10: "👑 <strong>Level 10 (MEGA BOSS):</strong> Dr. Zomboss in his giant Zombot Mech! Glowing headlight eyes, razor teeth, and crushing metal fists!"
     };
 
     levelBtns.forEach(btn => {

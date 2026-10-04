@@ -584,9 +584,12 @@ class MathDefenseGame {
         window.soundEffects.startBGM();
 
         // Announce Wave
-        if (this.currentWave % 5 === 0) {
+        if (this.currentWave % 10 === 0) {
             const extra = this.sunMultiplesMode ? ` - MULTIPLES OF ${this.currentMultipleTarget}!` : '';
-            this.announceWave(`⚠️ WAVE ${this.currentWave}: BOSS BATTLE!${extra}`);
+            this.announceWave(`👑 WAVE ${this.currentWave}: DR. ZOMBOSS MEGA BATTLE!${extra}`);
+        } else if (this.currentWave % 5 === 0) {
+            const extra = this.sunMultiplesMode ? ` - MULTIPLES OF ${this.currentMultipleTarget}!` : '';
+            this.announceWave(`⚠️ WAVE ${this.currentWave}: GARGANTUAR BOSS BATTLE!${extra}`);
         } else {
             const extra = this.sunMultiplesMode ? ` - Collect Multiples of ${this.currentMultipleTarget}! ⭐` : '! Defend the Lawn!';
             this.announceWave(`Wave ${this.currentWave}${extra}`);
@@ -613,13 +616,24 @@ class MathDefenseGame {
         const isBossWave = (waveNum % 5 === 0);
 
         if (isBossWave) {
-            // Boss Wave: A few scouts to build streak/sun, then the Gargantuar Boss!
-            const queue = ['regular', 'conehead', 'regular', 'buckethead', 'boss'];
-            this.zombiesToSpawn = queue;
-            this.waveTotalZombies = queue.length;
-            this.spawnInterval = 4.5;
-            this.spawnTimer = 1.0;
-            return;
+            const isMegaBoss = (waveNum % 10 === 0);
+            if (isMegaBoss) {
+                // Dr. Zomboss Mega Boss Battle!
+                const queue = ['conehead', 'buckethead', 'conehead', 'buckethead', 'zomboss'];
+                this.zombiesToSpawn = queue;
+                this.waveTotalZombies = queue.length;
+                this.spawnInterval = 4.2;
+                this.spawnTimer = 1.0;
+                return;
+            } else {
+                // Gargantuar Boss Battle (Level 5, 15, 25...)
+                const queue = ['regular', 'conehead', 'regular', 'buckethead', 'boss'];
+                this.zombiesToSpawn = queue;
+                this.waveTotalZombies = queue.length;
+                this.spawnInterval = 4.5;
+                this.spawnTimer = 1.0;
+                return;
+            }
         }
 
         let regularCount = 3 + waveNum;
@@ -888,6 +902,20 @@ class MathDefenseGame {
         // Only send zombies down lanes whose lawnmowers are still intact!
         const intactLanes = this.getDefendedLanes();
         const candidateLanes = intactLanes.length > 0 ? intactLanes : Array.from({length: this.laneCount}, (_, i) => i);
+
+        if (type === 'zomboss') {
+            let lane = candidateLanes.includes(1) ? 1 : candidateLanes[Math.floor(Math.random() * candidateLanes.length)];
+            const spawnX = this.baseWidth + 45;
+            const spawnY = this.laneHeights[lane] - 10;
+            const zomboss = new ZombossZombie(spawnX, spawnY, lane, 12);
+            this.zombies.push(zomboss);
+
+            window.soundEffects.playBossRoar();
+            this.screenShake = 22;
+            this.announceWave('⚠️ DR. ZOMBOSS MECH DETECTED! ⚠️');
+            this.particles.addFloatingText('👑 DR. ZOMBOSS! 👑', spawnX - 30, spawnY - 70, '#FF1744', 36);
+            return;
+        }
 
         if (type === 'boss') {
             // Gargantuar Boss prefers center lane if intact, otherwise any intact lane
@@ -1956,8 +1984,10 @@ class MathDefenseGame {
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-        ctx.shadowBlur = 4;
-        const bossStatus = isEnraged ? '🔥 ENRAGED GARGANTUAR' : '🧟 GARGANTUAR BOSS';
+        let bossStatus = isEnraged ? '🔥 ENRAGED GARGANTUAR' : '🧟 GARGANTUAR BOSS';
+        if (boss.isMegaBoss) {
+            bossStatus = isEnraged ? '🔥 CRITICAL CORE: DR. ZOMBOSS' : '👑 DR. ZOMBOSS MECH';
+        }
         ctx.fillText(bossStatus, barX + 12, barY + barH / 2 + 1);
 
         // Right Label: HP Number

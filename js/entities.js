@@ -1073,6 +1073,583 @@ class BossZombie extends Zombie {
 }
 
 // ----------------------------------------------------
+// DR. ZOMBOSS & ZOMBOT MECH (MEGA BOSS)
+// ----------------------------------------------------
+class ZombossZombie extends Zombie {
+    constructor(x, y, lane = 1, baseSpeed = 12) {
+        super(x, y, lane, 'zomboss', baseSpeed);
+        this.hp = 24;
+        this.maxHp = 24;
+        this.isBoss = true;
+        this.isMegaBoss = true;
+        this.name = '👑 DR. ZOMBOSS MECH';
+        this.hasThrownImp = false;
+        this.impThrowPending = false;
+        this.thudTimer = 0;
+        this.scale = 1.85;
+        this.sparkTimer = 0;
+        this.sparks = [];
+    }
+
+    takeHit(damage, isIce = false, isLethal = false) {
+        const actualDamage = isLethal ? 999 : (damage > 10 ? 6 : damage);
+        this.hp -= actualDamage;
+        this.hitFlashTimer = 0.2;
+        this.x += (isLethal ? 0 : 3); // Minimal knockback for giant mech
+
+        if (isIce) {
+            this.isFrozen = true;
+            this.frozenTimer = 1.8;
+        }
+
+        // Spawn extra sparks when struck
+        for (let i = 0; i < 4; i++) {
+            this.sparks.push({
+                x: (Math.random() - 0.5) * 40,
+                y: -10 + (Math.random() - 0.5) * 40,
+                vx: (Math.random() - 0.5) * 80,
+                vy: -30 - Math.random() * 50,
+                life: 0.35 + Math.random() * 0.25,
+                color: Math.random() < 0.5 ? '#FFD54F' : '#FF5722'
+            });
+        }
+
+        // Eject Imp from cockpit at <= 50% HP
+        if (this.hp <= this.maxHp / 2 && !this.hasThrownImp) {
+            this.hasThrownImp = true;
+            this.impThrowPending = true;
+        }
+
+        if (this.hp <= 0) {
+            this.hp = 0;
+            this.isDead = true;
+            return { killed: true, droppedArmor: false };
+        }
+
+        return { killed: false, droppedArmor: false };
+    }
+
+    update(dt, speedMultiplier, attackThresholdX) {
+        super.update(dt, speedMultiplier, attackThresholdX);
+        if (!this.isDead && !this.isAttacking) {
+            this.thudTimer += dt * speedMultiplier;
+            if (this.thudTimer >= 1.4) {
+                this.thudTimer = 0;
+                window.soundEffects.playBossThud();
+            }
+        }
+
+        // Spark emitter (mechanical wear / damage)
+        this.sparkTimer += dt;
+        if (this.sparkTimer > 0.2) {
+            this.sparkTimer = 0;
+            if (Math.random() < (this.hp < this.maxHp / 2 ? 0.8 : 0.35)) {
+                this.sparks.push({
+                    x: -25 + (Math.random() - 0.5) * 20, // around left shoulder exhaust
+                    y: -30 + (Math.random() - 0.5) * 20,
+                    vx: -20 - Math.random() * 30,
+                    vy: -40 - Math.random() * 30,
+                    life: 0.3 + Math.random() * 0.2,
+                    color: Math.random() < 0.6 ? '#FFEE58' : '#FF7043'
+                });
+            }
+        }
+
+        // Update sparks
+        for (let i = this.sparks.length - 1; i >= 0; i--) {
+            const s = this.sparks[i];
+            s.x += s.vx * dt;
+            s.y += s.vy * dt;
+            s.vy += 120 * dt; // gravity
+            s.life -= dt;
+            if (s.life <= 0) {
+                this.sparks.splice(i, 1);
+            }
+        }
+    }
+
+    render(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.scale(this.scale, this.scale);
+        ctx.translate(0, -10);
+
+        if (this.isDead) {
+            const alpha = Math.max(0, 1 - this.deathTimer * 1.5);
+            ctx.globalAlpha = alpha;
+            ctx.rotate(this.deathTimer * 1.0);
+            ctx.translate(0, this.deathTimer * 18);
+        }
+
+        if (this.hitFlashTimer > 0) {
+            ctx.filter = 'brightness(2.2)';
+        } else if (this.isFrozen) {
+            ctx.filter = 'hue-rotate(160deg) saturate(1.8)';
+        }
+
+        const limp = Math.sin(this.walkCycle * 2.8);
+        const legSway = Math.sin(this.walkCycle * 2.8) * 0.28;
+        const armSway = Math.cos(this.walkCycle * 2.8) * 0.25;
+
+        // 1. Giant Mech Ground Shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+        ctx.beginPath();
+        ctx.ellipse(0, 48, 44, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Rear Curved Exhaust Tubes (Arching from back over shoulders)
+        ctx.save();
+        // Left exhaust pipe
+        ctx.strokeStyle = '#90A4AE';
+        ctx.lineWidth = 9;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(8, -10);
+        ctx.bezierCurveTo(22, -38, -12, -56, -26, -34);
+        ctx.stroke();
+
+        // Ribbed pipe segments
+        ctx.strokeStyle = '#455A64';
+        ctx.lineWidth = 10;
+        ctx.setLineDash([3, 5]);
+        ctx.beginPath();
+        ctx.moveTo(8, -10);
+        ctx.bezierCurveTo(22, -38, -12, -56, -26, -34);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // 3. Heavy Armored Legs
+        // Left Leg (Back)
+        ctx.save();
+        ctx.translate(-12, 22);
+        ctx.rotate(-legSway);
+        // Slate blue armored thigh
+        ctx.fillStyle = '#1E3A5F';
+        roundRect(ctx, -7, 0, 14, 20, 4);
+        ctx.fill();
+        // Knee armor plate
+        ctx.fillStyle = '#2C5282';
+        roundRect(ctx, -8, 12, 16, 9, 3);
+        ctx.fill();
+        // Heavy steel boot with thick sole
+        ctx.fillStyle = '#37474F';
+        ctx.strokeStyle = '#212121';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, -10, 20, 20, 10, 3);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#CFD8DC'; // Steel sole rim
+        ctx.fillRect(-10, 27, 20, 3);
+        ctx.restore();
+
+        // Right Leg (Front)
+        ctx.save();
+        ctx.translate(12, 22);
+        ctx.rotate(legSway);
+        // Slate blue armored thigh
+        ctx.fillStyle = '#2B4C7E';
+        roundRect(ctx, -7, 0, 14, 20, 4);
+        ctx.fill();
+        // Knee armor plate
+        ctx.fillStyle = '#3B679E';
+        roundRect(ctx, -8, 12, 16, 9, 3);
+        ctx.fill();
+        // Heavy steel boot with thick sole
+        ctx.fillStyle = '#455A64';
+        ctx.strokeStyle = '#212121';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, -10, 20, 20, 10, 3);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#CFD8DC'; // Steel sole rim
+        ctx.fillRect(-10, 27, 20, 3);
+        ctx.restore();
+
+        // 4. Heavy Steel Torso Chassis
+        const chestGrad = ctx.createLinearGradient(-26, -20, 26, 26);
+        chestGrad.addColorStop(0, '#546E7A');
+        chestGrad.addColorStop(0.5, '#37474F');
+        chestGrad.addColorStop(1, '#263238');
+        ctx.fillStyle = chestGrad;
+        ctx.strokeStyle = '#1A2327';
+        ctx.lineWidth = 2.5;
+        roundRect(ctx, -26, -18, 52, 44, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        // Center chassis seam plate & rivets
+        ctx.strokeStyle = '#102027';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, -16);
+        ctx.lineTo(0, 24);
+        ctx.stroke();
+
+        // Blue lower waist plate
+        ctx.fillStyle = '#1E3A5F';
+        roundRect(ctx, -22, 14, 44, 12, 4);
+        ctx.fill();
+        ctx.strokeStyle = '#0F1A24';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 5. Back Arm (Left Arm)
+        ctx.save();
+        ctx.translate(20, -6);
+        ctx.rotate(-armSway * 0.4);
+        // Exposed joint wiring
+        ctx.strokeStyle = '#E53935'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(-2, 2); ctx.lineTo(-2, 12); ctx.stroke();
+        ctx.strokeStyle = '#1E88E5';
+        ctx.beginPath(); ctx.moveTo(2, 2); ctx.lineTo(2, 12); ctx.stroke();
+        // Forearm
+        ctx.fillStyle = '#558B2F';
+        ctx.strokeStyle = '#2E7D32';
+        ctx.lineWidth = 2;
+        roundRect(ctx, -7, 10, 14, 22, 5);
+        ctx.fill(); ctx.stroke();
+        // Hand & segmented fingers
+        ctx.fillStyle = '#455A64';
+        roundRect(ctx, -9, 28, 18, 14, 3);
+        ctx.fill();
+        // Silver knuckle plates
+        ctx.fillStyle = '#ECEFF1';
+        ctx.fillRect(-8, 38, 4, 4);
+        ctx.fillRect(-3, 38, 4, 4);
+        ctx.fillRect(2, 38, 4, 4);
+        ctx.restore();
+
+        // 6. Giant Robot Head / Cockpit (The iconic Zombot Skull!)
+        ctx.save();
+        ctx.translate(-4, -28 + limp * 1.5);
+
+        // Heavy Red Riveted Neck Collar
+        ctx.fillStyle = '#B71C1C';
+        ctx.strokeStyle = '#5F0909';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.ellipse(0, 4, 28, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Silver collar rivets
+        ctx.fillStyle = '#ECEFF1';
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+            const rx = Math.cos(a) * 23;
+            const ry = 4 + Math.sin(a) * 8;
+            ctx.beginPath();
+            ctx.arc(rx, ry, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Antenna bolts on sides of robot head
+        ctx.fillStyle = '#B0BEC5';
+        ctx.strokeStyle = '#37474F';
+        ctx.lineWidth = 2;
+        // Left bolt
+        ctx.fillRect(-36, -10, 10, 4);
+        ctx.strokeRect(-36, -10, 10, 4);
+        ctx.beginPath(); ctx.arc(-36, -8, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Right bolt
+        ctx.fillRect(26, -10, 10, 4);
+        ctx.strokeRect(26, -10, 10, 4);
+        ctx.beginPath(); ctx.arc(36, -8, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // Olive-green metallic skull casing
+        const skullGrad = ctx.createLinearGradient(-26, -34, 26, 12);
+        skullGrad.addColorStop(0, '#7CB342');
+        skullGrad.addColorStop(0.4, '#558B2F');
+        skullGrad.addColorStop(1, '#33691E');
+        ctx.fillStyle = skullGrad;
+        ctx.strokeStyle = '#1B5E20';
+        ctx.lineWidth = 3;
+        roundRect(ctx, -26, -30, 52, 40, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        // Jutting Heavy Lower Jaw
+        ctx.fillStyle = '#497523';
+        ctx.strokeStyle = '#1B5E20';
+        ctx.lineWidth = 2;
+        roundRect(ctx, -28, 6, 56, 15, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        // Dark mouth cavity
+        ctx.fillStyle = '#1B1C22';
+        ctx.fillRect(-22, 1, 44, 9);
+
+        // Sharp Jagged Metal Teeth (Top & Bottom)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.strokeStyle = '#78909C';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        // Top teeth
+        ctx.moveTo(-20, 1);
+        for (let i = 0; i < 5; i++) {
+            const tx = -20 + i * 8;
+            ctx.lineTo(tx + 4, 6);
+            ctx.lineTo(tx + 8, 1);
+        }
+        // Bottom teeth
+        ctx.moveTo(-20, 10);
+        for (let i = 0; i < 5; i++) {
+            const tx = -20 + i * 8;
+            ctx.lineTo(tx + 4, 5);
+            ctx.lineTo(tx + 8, 10);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        // Huge Glowing Yellow Headlight Eyes
+        // Left Eye
+        ctx.save();
+        ctx.fillStyle = '#263238';
+        ctx.beginPath();
+        ctx.arc(-13, -12, 11, 0, Math.PI * 2);
+        ctx.fill();
+        const eyeGrad = ctx.createRadialGradient(-13, -12, 2, -13, -12, 10);
+        eyeGrad.addColorStop(0, '#FFFF8D');
+        eyeGrad.addColorStop(0.6, '#FFEA00');
+        eyeGrad.addColorStop(1, '#F57F17');
+        ctx.fillStyle = eyeGrad;
+        ctx.beginPath();
+        ctx.arc(-13, -12, 9, 0, Math.PI * 2);
+        ctx.fill();
+        // Eye shine
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath();
+        ctx.arc(-15, -14, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        // Slanted metal brow / eyelid
+        ctx.fillStyle = '#33691E';
+        ctx.fillRect(-23, -22, 20, 5);
+        ctx.restore();
+
+        // Right Eye
+        ctx.save();
+        ctx.fillStyle = '#263238';
+        ctx.beginPath();
+        ctx.arc(13, -12, 11, 0, Math.PI * 2);
+        ctx.fill();
+        const eyeGrad2 = ctx.createRadialGradient(13, -12, 2, 13, -12, 10);
+        eyeGrad2.addColorStop(0, '#FFFF8D');
+        eyeGrad2.addColorStop(0.6, '#FFEA00');
+        eyeGrad2.addColorStop(1, '#F57F17');
+        ctx.fillStyle = eyeGrad2;
+        ctx.beginPath();
+        ctx.arc(13, -12, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath();
+        ctx.arc(11, -14, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        // Slanted metal brow / eyelid
+        ctx.fillStyle = '#33691E';
+        ctx.fillRect(3, -22, 20, 5);
+        ctx.restore();
+
+        // 7. DR. EDGAR ZOMBOSS IN THE COCKPIT HATCH!
+        ctx.save();
+        ctx.translate(0, -32);
+
+        // Cockpit hatch rim
+        ctx.fillStyle = '#263238';
+        ctx.strokeStyle = '#37474F';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(0, 4, 18, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Dr. Zomboss Body / White Lab Coat
+        ctx.fillStyle = '#ECEFF1';
+        ctx.strokeStyle = '#90A4AE';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, -9, -9, 18, 12, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // Lab coat buttons & collar
+        ctx.strokeStyle = '#37474F';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, -9); ctx.lineTo(0, 2);
+        ctx.stroke();
+
+        // Steering Joysticks with Red Knobs (rocking back & forth!)
+        const joystickRock = Math.sin(this.walkCycle * 4) * 0.2;
+        // Left Joystick
+        ctx.save();
+        ctx.translate(-7, -1);
+        ctx.rotate(joystickRock);
+        ctx.strokeStyle = '#455A64'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -8); ctx.stroke();
+        ctx.fillStyle = '#E53935';
+        ctx.beginPath(); ctx.arc(0, -8, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        // Right Joystick
+        ctx.save();
+        ctx.translate(7, -1);
+        ctx.rotate(-joystickRock);
+        ctx.strokeStyle = '#455A64'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -8); ctx.stroke();
+        ctx.fillStyle = '#E53935';
+        ctx.beginPath(); ctx.arc(0, -8, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // Dr. Zomboss Head (Giant bald cranium & brain folds!)
+        const zombossHeadY = -22 + (this.hitFlashTimer > 0 ? 3 : 0);
+        ctx.save();
+        ctx.translate(0, zombossHeadY);
+
+        // Huge Cranium
+        const brainGrad = ctx.createRadialGradient(-3, -4, 3, 0, -2, 14);
+        brainGrad.addColorStop(0, '#D4E157');
+        brainGrad.addColorStop(0.6, '#AFB42B');
+        brainGrad.addColorStop(1, '#827717');
+        ctx.fillStyle = brainGrad;
+        ctx.strokeStyle = '#33691E';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        // Bulbous cranium shape: wider at top
+        ctx.ellipse(0, -2, 11, 13, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Faint brain wrinkle / suture lines
+        ctx.strokeStyle = '#827717';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(0, -7, 6, 0.2, Math.PI - 0.2, true);
+        ctx.moveTo(-5, -4); ctx.lineTo(-1, -7);
+        ctx.moveTo(5, -4); ctx.lineTo(1, -7);
+        ctx.stroke();
+
+        // Pointy Zombie Ears
+        ctx.fillStyle = '#AFB42B';
+        ctx.beginPath();
+        ctx.moveTo(-11, 1); ctx.lineTo(-15, -1); ctx.lineTo(-10, 4);
+        ctx.moveTo(11, 1); ctx.lineTo(15, -1); ctx.lineTo(10, 4);
+        ctx.fill();
+
+        // Bulging Zombie Eyes
+        ctx.fillStyle = '#FFFDE7';
+        ctx.strokeStyle = '#212121';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(-4, 1, 3.8, 0, Math.PI * 2);
+        ctx.arc(4, 1, 3.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Pinpoint Pupils staring evilly forward
+        ctx.fillStyle = '#D50000';
+        ctx.beginPath();
+        ctx.arc(-4.5, 1.2, 1.3, 0, Math.PI * 2);
+        ctx.arc(3.5, 1.2, 1.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wicked Manic Grin with Jagged Teeth
+        ctx.fillStyle = '#212121';
+        ctx.beginPath();
+        ctx.arc(0, 6, 4.5, 0, Math.PI);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFEE58';
+        ctx.fillRect(-3, 6, 2, 2.5);
+        ctx.fillRect(1, 6, 2, 2.5);
+
+        ctx.restore(); // end Dr. Zomboss head
+        ctx.restore(); // end Dr. Zomboss cockpit
+        ctx.restore(); // end Zombot head
+
+        // 8. Front Arm (Right Arm - Foreground)
+        ctx.save();
+        ctx.translate(-22, -6);
+        ctx.rotate(this.isAttacking ? -0.9 + Math.sin(this.attackTimer * 7) * 0.5 : armSway * 0.45);
+
+        // Giant Spherical Olive-green Shoulder Pauldron
+        const pauldronGrad = ctx.createRadialGradient(-4, -4, 4, 0, 0, 18);
+        pauldronGrad.addColorStop(0, '#8BC34A');
+        pauldronGrad.addColorStop(0.5, '#558B2F');
+        pauldronGrad.addColorStop(1, '#33691E');
+        ctx.fillStyle = pauldronGrad;
+        ctx.strokeStyle = '#1B5E20';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Center silver bolt / slotted screw head
+        ctx.fillStyle = '#CFD8DC';
+        ctx.strokeStyle = '#37474F';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = '#263238';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-3, 0); ctx.lineTo(3, 0);
+        ctx.stroke();
+
+        // Exposed elbow/shoulder wires
+        ctx.strokeStyle = '#E53935'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(-3, 14); ctx.lineTo(-3, 20); ctx.stroke();
+        ctx.strokeStyle = '#1E88E5';
+        ctx.beginPath(); ctx.moveTo(0, 14); ctx.lineTo(0, 20); ctx.stroke();
+        ctx.strokeStyle = '#FDD835';
+        ctx.beginPath(); ctx.moveTo(3, 14); ctx.lineTo(3, 20); ctx.stroke();
+
+        // Heavy Forearm Segment
+        ctx.fillStyle = '#689F38';
+        ctx.strokeStyle = '#2E7D32';
+        ctx.lineWidth = 2.5;
+        roundRect(ctx, -8, 18, 16, 26, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        // Giant Mechanical Claw Hand with 4 Articulated Fingers
+        ctx.save();
+        ctx.translate(0, 42);
+        ctx.fillStyle = '#546E7A';
+        ctx.strokeStyle = '#263238';
+        ctx.lineWidth = 2;
+        roundRect(ctx, -10, 0, 20, 12, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        // 4 Segmented Fingers
+        for (let f = 0; f < 4; f++) {
+            const fx = -9 + f * 5.2;
+            ctx.fillStyle = '#607D8B';
+            roundRect(ctx, fx, 10, 4.2, 10, 2);
+            ctx.fill();
+            // Silver nail / armor tip
+            ctx.fillStyle = '#ECEFF1';
+            ctx.fillRect(fx, 17, 4.2, 3);
+        }
+        ctx.restore(); // end hand
+
+        ctx.restore(); // end front arm
+
+        // 9. Spark particles
+        for (const s of this.sparks) {
+            ctx.fillStyle = s.color;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore(); // end entire mech
+    }
+}
+
+// ----------------------------------------------------
 // LAWNMOWER
 // ----------------------------------------------------
 class Lawnmower {
