@@ -9,6 +9,7 @@ class MathEngine {
         this.selectedOperations = ['addition', 'subtraction', 'multiplication', 'division']; // default all active
         this.mode = 'multiplication'; // backward compatibility
         this.currentProblem = null;
+        this.lastProblem = null;
         this.problemQueue = [];
         this.missedQueue = [];
         this.history = [];
@@ -24,6 +25,7 @@ class MathEngine {
     }
 
     resetStats() {
+        this.lastProblem = null;
         this.stats = {
             totalAnswered: 0,
             correct: 0,
@@ -38,6 +40,7 @@ class MathEngine {
     }
 
     setOperations(ops) {
+        this.lastProblem = null;
         if (!Array.isArray(ops) || ops.length === 0) {
             this.selectedOperations = ['multiplication'];
         } else {
@@ -51,6 +54,7 @@ class MathEngine {
     }
 
     setMode(mode) {
+        this.lastProblem = null;
         // Backwards compatibility helper
         const validModes = ['multiplication', 'division', 'mixed'];
         this.mode = validModes.includes(mode) ? mode : 'multiplication';
@@ -65,6 +69,7 @@ class MathEngine {
     }
 
     setTables(tables) {
+        this.lastProblem = null;
         if (!tables || tables.length === 0) {
             this.selectedTables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
         } else {
@@ -188,25 +193,176 @@ class MathEngine {
             [deck[i], deck[j]] = [deck[j], deck[i]];
         }
 
+        // If the top card matches the previous problem, swap it with another non-matching card in the deck
+        if (deck.length > 1 && this.lastProblem && this.isSameProblem(deck[0], this.lastProblem)) {
+            const swapIdx = deck.findIndex((p, idx) => idx > 0 && !this.isSameProblem(p, this.lastProblem));
+            if (swapIdx !== -1) {
+                [deck[0], deck[swapIdx]] = [deck[swapIdx], deck[0]];
+            }
+        }
+
         this.problemQueue = deck;
     }
 
+    normalizeOp(op) {
+        if (!op) return '';
+        if (op === '*' || op === 'x' || op === 'X') return '×';
+        if (op === '/') return '÷';
+        if (op === '-') return '−';
+        return op;
+    }
+
+    isSameProblem(p1, p2) {
+        if (!p1 || !p2) return false;
+        const op1 = this.normalizeOp(p1.op);
+        const op2 = this.normalizeOp(p2.op);
+        if (op1 !== op2) return false;
+
+        // Exact match
+        if (p1.a === p2.a && p1.b === p2.b) return true;
+
+        // Commutative match for multiplication and addition (e.g., 7 × 8 is equivalent to 8 × 7)
+        if ((op1 === '×' || op1 === '+') && p1.a === p2.b && p1.b === p2.a) {
+            return true;
+        }
+
+        return false;
+    }
+
+    generateSingleProblem(excludeProblem = null) {
+        const ops = (this.selectedOperations && this.selectedOperations.length > 0)
+            ? this.selectedOperations
+            : ['multiplication'];
+        const tables = (this.selectedTables && this.selectedTables.length > 0)
+            ? this.selectedTables
+            : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+        let candidate = null;
+        let attempts = 0;
+        const maxAttempts = 35;
+
+        while (attempts < maxAttempts) {
+            attempts++;
+            const opName = ops[Math.floor(Math.random() * ops.length)];
+            const num1 = tables[Math.floor(Math.random() * tables.length)];
+
+            if (opName === 'multiplication') {
+                const num2 = Math.floor(Math.random() * 12) + 1;
+                candidate = {
+                    op: '×',
+                    a: num1,
+                    b: num2,
+                    answer: num1 * num2,
+                    attempts: 0
+                };
+            } else if (opName === 'division') {
+                const num2 = Math.floor(Math.random() * 12) + 1;
+                candidate = {
+                    op: '÷',
+                    a: num1 * num2,
+                    b: num1,
+                    answer: num2,
+                    attempts: 0
+                };
+            } else if (opName === 'addition') {
+                const num2 = Math.floor(Math.random() * 20) + 1;
+                if (Math.random() < 0.5) {
+                    candidate = {
+                        op: '+',
+                        a: num1,
+                        b: num2,
+                        answer: num1 + num2,
+                        attempts: 0
+                    };
+                } else {
+                    candidate = {
+                        op: '+',
+                        a: num2,
+                        b: num1,
+                        answer: num2 + num1,
+                        attempts: 0
+                    };
+                }
+            } else if (opName === 'subtraction') {
+                const num2 = Math.floor(Math.random() * 20) + 1;
+                const sum = num1 + num2;
+                if (sum <= 20 && Math.random() < 0.5) {
+                    candidate = {
+                        op: '−',
+                        a: sum,
+                        b: num2,
+                        answer: num1,
+                        attempts: 0
+                    };
+                } else {
+                    candidate = {
+                        op: '−',
+                        a: sum,
+                        b: num1,
+                        answer: num2,
+                        attempts: 0
+                    };
+                }
+            }
+
+            if (!excludeProblem || !this.isSameProblem(candidate, excludeProblem)) {
+                return candidate;
+            }
+        }
+
+        return candidate || {
+            op: '×',
+            a: tables[0] || 1,
+            b: 2,
+            answer: (tables[0] || 1) * 2,
+            attempts: 0
+        };
+    }
+
     nextProblem() {
-        // Prioritize missed questions if ready (spaced repetition)
+        let candidate = null;
+
+        // 1. Spaced repetition from missed queue if available and not identical to lastProblem
         if (this.missedQueue.length > 0 && Math.random() < 0.45) {
-            this.currentProblem = this.missedQueue.shift();
-            this.currentProblem.isReview = true;
-            this.currentProblem.startTime = Date.now();
-            return this.currentProblem;
+            const validMissedIdx = this.missedQueue.findIndex(p => !this.isSameProblem(p, this.lastProblem));
+            if (validMissedIdx !== -1) {
+                candidate = this.missedQueue.splice(validMissedIdx, 1)[0];
+                candidate.isReview = true;
+            }
         }
 
-        if (this.problemQueue.length === 0) {
-            this.generateQueue();
+        // 2. Otherwise pull from problemQueue
+        if (!candidate) {
+            if (this.problemQueue.length === 0) {
+                this.generateQueue();
+            }
+
+            const validQueueIdx = this.problemQueue.findIndex(p => !this.isSameProblem(p, this.lastProblem));
+            if (validQueueIdx !== -1) {
+                candidate = this.problemQueue.splice(validQueueIdx, 1)[0];
+                candidate.isReview = false;
+            } else {
+                // If all remaining queue items match lastProblem, re-generate a fresh distinct problem
+                candidate = this.generateSingleProblem(this.lastProblem);
+                candidate.isReview = false;
+            }
         }
 
-        this.currentProblem = this.problemQueue.shift();
-        this.currentProblem.isReview = false;
-        this.currentProblem.startTime = Date.now();
+        // 3. Fallback guard: If candidate still matches lastProblem, re-generate a new problem!
+        if (!candidate || this.isSameProblem(candidate, this.lastProblem)) {
+            candidate = this.generateSingleProblem(this.lastProblem);
+            candidate.isReview = false;
+        }
+
+        candidate.startTime = Date.now();
+        this.currentProblem = candidate;
+        this.lastProblem = {
+            op: candidate.op,
+            a: candidate.a,
+            b: candidate.b,
+            answer: candidate.answer
+        };
+
         return this.currentProblem;
     }
 
@@ -243,14 +399,19 @@ class MathEngine {
         } else {
             this.stats.incorrect++;
             this.stats.streak = 0;
-            // Add back to missed queue for later repetition
-            this.missedQueue.push({
-                op: this.currentProblem.op || '×',
-                a: this.currentProblem.a,
-                b: this.currentProblem.b,
-                answer: this.currentProblem.answer,
-                attempts: (this.currentProblem.attempts || 0) + 1
-            });
+            // Add back to missed queue for later repetition (avoid duplicates)
+            const existingMissed = this.missedQueue.find(p => this.isSameProblem(p, this.currentProblem));
+            if (existingMissed) {
+                existingMissed.attempts = (existingMissed.attempts || 0) + 1;
+            } else {
+                this.missedQueue.push({
+                    op: this.currentProblem.op || '×',
+                    a: this.currentProblem.a,
+                    b: this.currentProblem.b,
+                    answer: this.currentProblem.answer,
+                    attempts: (this.currentProblem.attempts || 0) + 1
+                });
+            }
         }
 
         const result = {
