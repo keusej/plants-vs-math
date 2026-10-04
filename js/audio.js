@@ -152,6 +152,29 @@ class SoundEffects {
         this.playNoise(0.06, 0.4, 600);
     }
 
+    // Super Pea rapid-fire plasma pop
+    playSuperPeaShoot() {
+        if (!this.ready()) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        // Punchy bright high-tech pea pop
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+
+        gain.gain.setValueAtTime(this.sfxVolume * 0.85, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+
+        this.playNoise(0.03, 0.35, 1600);
+    }
+
     // Pea hit splat
     playHit(isArmor = false) {
         if (!this.ready()) return;

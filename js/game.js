@@ -311,6 +311,28 @@ class MathDefenseGame {
                 return;
             }
 
+            // 2.7 If Super Pea Barrage is selected, fire row barrage in clicked lane!
+            if (this.selectedSeed === 'superpea') {
+                if (this.sun >= 8) {
+                    const grassTop = 130;
+                    const totalLawnH = this.baseHeight - grassTop;
+                    const laneH = totalLawnH / this.laneCount;
+                    let targetLane = Math.floor((clickY - grassTop) / laneH);
+                    targetLane = Math.max(0, Math.min(this.laneCount - 1, targetLane));
+
+                    this.sun -= 8;
+                    this.triggerSuperPeaBarrage(targetLane);
+                    this.selectedSeed = null;
+                    this.updateHUD();
+                } else {
+                    window.soundEffects.playWrong();
+                    this.particles.addFloatingText('Need 8 Sun!', clickX, clickY - 30, '#FFD54F', 20);
+                    this.selectedSeed = null;
+                    this.updateHUD();
+                }
+                return;
+            }
+
             // 3. If Cherry Bomb is selected, plant it on the lawn!
             if (this.selectedSeed === 'cherrybomb') {
                 if (this.sun >= 8) {
@@ -389,6 +411,23 @@ class MathDefenseGame {
                     repeaterCard.classList.add('shake-card');
                     setTimeout(() => repeaterCard.classList.remove('shake-card'), 400);
                     this.particles.addFloatingText(`Need 5 ☀️! (Have ${this.sun})`, 130, 85, '#FFD54F', 18);
+                }
+            });
+        }
+
+        // Super Pea Barrage Seed Card click handler (Cost: 8 ☀️)
+        const superPeaCard = document.getElementById('superPeaSeed');
+        if (superPeaCard) {
+            superPeaCard.addEventListener('click', () => {
+                if (this.gameState !== 'playing') return;
+                if (this.sun >= 8) {
+                    this.selectedSeed = (this.selectedSeed === 'superpea' ? null : 'superpea');
+                    this.updateHUD();
+                } else {
+                    window.soundEffects.playWrong();
+                    superPeaCard.classList.add('shake-card');
+                    setTimeout(() => superPeaCard.classList.remove('shake-card'), 400);
+                    this.particles.addFloatingText(`Need 8 ☀️! (Have ${this.sun})`, 130, 85, '#FFD54F', 18);
                 }
             });
         }
@@ -774,6 +813,56 @@ class MathDefenseGame {
         }
     }
 
+    triggerSuperPeaBarrage(targetLane) {
+        const shooter = this.peashooters[targetLane];
+        const spawnX = (shooter && !shooter.dead) ? (shooter.x + 35) : (this.defenseX - 35);
+        const spawnY = this.laneHeights[targetLane] - 10;
+
+        // Calculate living non-boss zombie HP in this row
+        let neededPeas = 0;
+        let hasBoss = false;
+        for (const z of this.zombies) {
+            if (!z.isDead && z.lane === targetLane) {
+                if (z.isBoss) {
+                    hasBoss = true;
+                } else {
+                    neededPeas += Math.max(1, z.hp);
+                }
+            }
+        }
+
+        // "shoots enough peas to kill all zombies on the row, for a boss it just shoots one pea worth of damage"
+        if (hasBoss) {
+            neededPeas += 1;
+        }
+
+        // Fire at least 8 rapid peas so it looks/sounds like an epic Gatling barrage
+        const peaCount = Math.max(8, neededPeas);
+        const barrageId = Date.now() + Math.random();
+
+        if (shooter && !shooter.dead) {
+            shooter.superGlow = 2.0;
+        }
+
+        this.particles.addSplat(spawnX, spawnY, '#76FF03', 25);
+        this.particles.addFloatingText('🫛 SUPER PEA BARRAGE! 🟢', spawnX + 45, spawnY - 35, '#76FF03', 24);
+        this.screenShake = 10;
+        window.soundEffects.playUpgrade();
+
+        // Queue machine-gun burst of peas (50ms interval between each shot)
+        for (let k = 0; k < peaCount; k++) {
+            this.pendingPeas.push({
+                delay: 0.06 + k * 0.05,
+                lane: targetLane,
+                type: 'super',
+                isSuperBarrage: true,
+                barrageId: barrageId,
+                spawnX: spawnX,
+                spawnY: spawnY
+            });
+        }
+    }
+
     getDefendedLanes() {
         const intact = [];
         for (let i = 0; i < this.laneCount; i++) {
@@ -896,10 +985,14 @@ class MathDefenseGame {
                     if (shooter && !shooter.dead) {
                         shooter.shoot();
                     }
-                    const isFire = pp.type === 'fire';
-                    const isIce = pp.type === 'ice';
-                    window.soundEffects.playShoot(isFire, isIce);
-                    this.peas.push(new Pea(pp.spawnX, pp.spawnY, pp.lane, pp.type));
+                    if (pp.type === 'super') {
+                        window.soundEffects.playSuperPeaShoot();
+                    } else {
+                        const isFire = pp.type === 'fire';
+                        const isIce = pp.type === 'ice';
+                        window.soundEffects.playShoot(isFire, isIce);
+                    }
+                    this.peas.push(new Pea(pp.spawnX, pp.spawnY, pp.lane, pp.type, pp.isSuperBarrage || false, pp.barrageId || null));
                 }
             }
         }
@@ -921,6 +1014,10 @@ class MathDefenseGame {
             for (const z of this.zombies) {
                 const hitRadius = z.isBoss ? 45 : 28;
                 if (!z.isDead && z.lane === pea.lane && Math.abs(z.x - pea.x) < hitRadius) {
+                    // If this is a Super Barrage pea and z is a Boss who already took 1 pea damage from this barrage:
+                    if (pea.isSuperBarrage && z.isBoss && z.lastSuperBarrageId === pea.barrageId) {
+                        continue; // Bypasses boss to hit remaining zombies behind him!
+                    }
                     if (z.x < minZX) {
                         minZX = z.x;
                         targetZ = z;
@@ -930,11 +1027,15 @@ class MathDefenseGame {
 
             if (targetZ) {
                 const z = targetZ;
+                // If hitting a Boss with a super barrage, record barrageId so subsequent peas do not hurt Boss again
+                if (pea.isSuperBarrage && z.isBoss) {
+                    z.lastSuperBarrageId = pea.barrageId;
+                }
                 // Hit!
                 const hitResult = z.takeHit(pea.damage, pea.type === 'ice');
                 window.soundEffects.playHit(hitResult.droppedArmor);
 
-                const splatColor = pea.type === 'fire' ? '#FF5722' : (pea.type === 'ice' ? '#00E5FF' : '#76FF03');
+                const splatColor = pea.type === 'super' ? '#76FF03' : (pea.type === 'fire' ? '#FF5722' : (pea.type === 'ice' ? '#00E5FF' : '#76FF03'));
                 this.particles.addSplat(pea.x + 8, pea.y, splatColor, z.isBoss ? 20 : 12);
 
                 if (hitResult.droppedArmor) {
@@ -1509,6 +1610,69 @@ class MathDefenseGame {
             ctx.restore();
         }
 
+        // 6.58 Draw Super Pea Row Barrage Aiming Guide & Reticle
+        if (this.selectedSeed === 'superpea' && this.isMouseOnCanvas) {
+            ctx.save();
+            const grassTop = 130;
+            const totalLawnH = this.baseHeight - grassTop;
+            const laneH = totalLawnH / this.laneCount;
+            let targetLane = Math.floor((this.mouseY - grassTop) / laneH);
+            targetLane = Math.max(0, Math.min(this.laneCount - 1, targetLane));
+
+            const laneTop = grassTop + targetLane * laneH;
+            const startX = this.defenseX - 70;
+            const lawnWidth = this.baseWidth - startX - 10;
+            const rowCenterY = this.laneHeights[targetLane] - 10;
+
+            // Highlight target row with glowing electric green beam/zone
+            ctx.fillStyle = 'rgba(118, 255, 3, 0.12)';
+            ctx.fillRect(startX, laneTop + 3, lawnWidth, laneH - 6);
+
+            ctx.strokeStyle = '#76FF03';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 6]);
+            ctx.strokeRect(startX, laneTop + 3, lawnWidth, laneH - 6);
+            ctx.setLineDash([]);
+
+            // Aiming reticle on the row at cursor X
+            ctx.strokeStyle = '#76FF03';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(this.mouseX, rowCenterY, 32, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Crosshair
+            ctx.beginPath();
+            ctx.moveTo(this.mouseX - 20, rowCenterY);
+            ctx.lineTo(this.mouseX + 20, rowCenterY);
+            ctx.moveTo(this.mouseX, rowCenterY - 20);
+            ctx.lineTo(this.mouseX, rowCenterY + 20);
+            ctx.stroke();
+
+            // Row target label
+            ctx.font = 'bold 13px "Segoe UI", Arial, sans-serif';
+            ctx.fillStyle = '#76FF03';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
+            ctx.textAlign = 'center';
+            ctx.strokeText(`🎯 ROW ${targetLane + 1} SUPER PEA BARRAGE 🟢`, this.mouseX, rowCenterY + 45);
+            ctx.fillText(`🎯 ROW ${targetLane + 1} SUPER PEA BARRAGE 🟢`, this.mouseX, rowCenterY + 45);
+
+            // Preview rapid pea icons flying from the peashooter
+            const shooter = this.peashooters[targetLane];
+            if (shooter && !shooter.dead) {
+                ctx.fillStyle = '#76FF03';
+                ctx.shadowColor = '#76FF03';
+                ctx.shadowBlur = 15;
+                for (let k = 0; k < 3; k++) {
+                    ctx.beginPath();
+                    ctx.arc(shooter.x + 40 + k * 18, rowCenterY, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            ctx.restore();
+        }
+
         // 6.6 Draw Potato Mine Grid Cell Snap & Ghost Preview
         if (this.selectedSeed === 'potatomine' && this.isMouseOnCanvas) {
             ctx.save();
@@ -1862,6 +2026,32 @@ class MathDefenseGame {
                     const pctMissing = Math.round(((5 - this.sun) / 5) * 100);
                     repeaterOverlay.style.height = `${pctMissing}%`;
                     repeaterOverlay.textContent = `${this.sun}/5 ☀️`;
+                }
+            }
+        }
+
+        // Super Pea Barrage Seed Card State (Cost: 8 ☀️)
+        const superPeaCard = document.getElementById('superPeaSeed');
+        const superPeaOverlay = document.getElementById('superPeaCooldownOverlay');
+        if (superPeaCard) {
+            if (this.selectedSeed === 'superpea') {
+                superPeaCard.className = 'seed-packet selected';
+                if (superPeaOverlay) {
+                    superPeaOverlay.style.height = '0%';
+                    superPeaOverlay.textContent = 'AIMING';
+                }
+            } else if (this.sun >= 8) {
+                superPeaCard.className = 'seed-packet ready';
+                if (superPeaOverlay) {
+                    superPeaOverlay.style.height = '0%';
+                    superPeaOverlay.textContent = 'READY!';
+                }
+            } else {
+                superPeaCard.className = 'seed-packet disabled';
+                if (superPeaOverlay) {
+                    const pctMissing = Math.round(((8 - this.sun) / 8) * 100);
+                    superPeaOverlay.style.height = `${pctMissing}%`;
+                    superPeaOverlay.textContent = `${this.sun}/8 ☀️`;
                 }
             }
         }

@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sunMultiplesMode) {
                 desc.innerHTML = '⭐ <strong>Multiples Mode:</strong> Each defeated zombie releases 2 numbered suns that float to the top! Click the valid multiple of 2–5 to earn sun. Wrong clicks lose a point (min 0)!';
             } else {
-                desc.innerHTML = '🌻 <strong>Classic Mode:</strong> Defeated zombies drop standard sun orbs to buy powerful plant upgrades (Potato Mines, Double Repeaters, Cherry Bombs, and Super Hot Chili Peppers).';
+                desc.innerHTML = '🌻 <strong>Classic Mode:</strong> Defeated zombies drop standard sun orbs to buy powerful plant upgrades (Potato Mines, Double Repeaters, Super Peas, Cherry Bombs, and Super Hot Chili Peppers).';
             }
         }
     }

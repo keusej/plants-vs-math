@@ -36,6 +36,7 @@ class Peashooter {
         this.hitFlash = 0;
         this.dead = false;
         this.isDouble = false;
+        this.superGlow = 0;
     }
 
     update(dt) {
@@ -46,6 +47,9 @@ class Peashooter {
         }
         if (this.hitFlash > 0) {
             this.hitFlash = Math.max(0, this.hitFlash - dt);
+        }
+        if (this.superGlow > 0) {
+            this.superGlow = Math.max(0, this.superGlow - dt * 1.5);
         }
 
         // Blinking
@@ -71,6 +75,9 @@ class Peashooter {
 
         if (this.hitFlash > 0) {
             ctx.filter = 'brightness(1.5) sepia(1) hue-rotate(-50deg)';
+        } else if (this.superGlow > 0) {
+            ctx.shadowColor = '#76FF03';
+            ctx.shadowBlur = 20 * this.superGlow;
         }
 
         const sway = Math.sin(this.animTime * 3) * 0.08;
@@ -246,16 +253,18 @@ class Peashooter {
 // PEA PROJECTILE
 // ----------------------------------------------------
 class Pea {
-    constructor(x, y, targetLane = 0, type = 'regular') {
+    constructor(x, y, targetLane = 0, type = 'regular', isSuperBarrage = false, barrageId = null) {
         this.x = x;
         this.y = y;
         this.lane = targetLane;
-        this.type = type; // 'regular', 'fire', 'ice'
-        this.speed = 820; // pixels per second
-        this.radius = type === 'fire' ? 12 : 9;
+        this.type = type; // 'regular', 'fire', 'ice', 'super'
+        this.speed = type === 'super' ? 980 : 820; // super peas travel at high velocity
+        this.radius = type === 'fire' ? 12 : (type === 'super' ? 11 : 9);
         this.isDead = false;
         this.trailTimer = 0;
         this.damage = type === 'fire' ? 2 : 1;
+        this.isSuperBarrage = isSuperBarrage;
+        this.barrageId = barrageId;
     }
 
     update(dt) {
@@ -266,7 +275,33 @@ class Pea {
         ctx.save();
         ctx.translate(this.x, this.y);
 
-        if (this.type === 'fire') {
+        if (this.type === 'super') {
+            // Neon Super Pea (Rapid-fire plasma pulse)
+            const grad = ctx.createRadialGradient(-3, -3, 2, 0, 0, this.radius);
+            grad.addColorStop(0, '#FFFFFF');
+            grad.addColorStop(0.3, '#CCFF90');
+            grad.addColorStop(0.7, '#76FF03');
+            grad.addColorStop(1, '#00C853');
+
+            ctx.fillStyle = grad;
+            ctx.shadowColor = '#76FF03';
+            ctx.shadowBlur = 18;
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Electric speed rings / inner core
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+
+            // Concentric speed trail ring
+            ctx.strokeStyle = 'rgba(118, 255, 3, 0.6)';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(-8, 0, this.radius * 0.75, Math.PI * 0.5, Math.PI * 1.5);
+            ctx.stroke();
+        } else if (this.type === 'fire') {
             // Fiery Pea
             const grad = ctx.createRadialGradient(-3, -3, 2, 0, 0, this.radius);
             grad.addColorStop(0, '#FFF59D');
@@ -362,6 +397,7 @@ class Zombie {
         this.isFrozen = false;
         this.frozenTimer = 0;
         this.armorPopped = false;
+        this.lastSuperBarrageId = null;
     }
 
     update(dt, speedMultiplier, attackThresholdX) {
