@@ -401,6 +401,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Header Fullscreen Button
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     fullscreenBtn?.addEventListener('click', () => {
+        fullscreenBtn.blur();
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+        }
         window.soundEffects?.unlock();
         const doc = document;
         const docEl = doc.documentElement;
@@ -420,6 +424,18 @@ document.addEventListener('DOMContentLoaded', () => {
             openSafariTips();
         }
     });
+
+    // Clear button focus when entering/exiting fullscreen so Enter key won't re-trigger it
+    const clearFullscreenFocus = () => {
+        fullscreenBtn?.blur();
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+        }
+    };
+    document.addEventListener('fullscreenchange', clearFullscreenFocus);
+    document.addEventListener('webkitfullscreenchange', clearFullscreenFocus);
+    document.addEventListener('mozfullscreenchange', clearFullscreenFocus);
+    document.addEventListener('msfullscreenchange', clearFullscreenFocus);
 
     // Check Updates / Reload Handlers (forces fresh cache for pinned Home Screen Web Apps)
     const reloadWithFreshCache = (e) => {

@@ -153,6 +153,10 @@ class MathDefenseGame {
             } else if (e.key === 'Backspace') {
                 this.backspace();
             } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                    document.activeElement.blur();
+                }
                 this.submitAnswer();
             } else if (e.key === 'c' || e.key === 'C') {
                 this.clearInput();
