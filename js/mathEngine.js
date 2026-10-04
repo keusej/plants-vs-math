@@ -110,9 +110,12 @@ class MathEngine {
                 }
             }
 
-            // 3. Addition Facts (1 to 20 range)
+            // 3. Addition Facts (bounded strictly to selected numbers)
             if (ops.includes('addition')) {
-                for (let num2 = 1; num2 <= 20; num2++) {
+                const maxSelected = (this.selectedTables && this.selectedTables.length > 0) ? Math.max(...this.selectedTables) : 12;
+                const addLimit = (maxSelected <= 2) ? maxSelected : (maxSelected <= 5 ? maxSelected : 12);
+                for (let num2 = 1; num2 <= addLimit; num2++) {
+                    if (maxSelected <= 2 && !this.selectedTables.includes(num2)) continue;
                     deck.push({
                         op: '+',
                         a: num1,
@@ -120,22 +123,15 @@ class MathEngine {
                         answer: num1 + num2,
                         attempts: 0
                     });
-                    if (num2 > 12) {
-                        // Also add reverse order for higher numbers
-                        deck.push({
-                            op: '+',
-                            a: num2,
-                            b: num1,
-                            answer: num2 + num1,
-                            attempts: 0
-                        });
-                    }
                 }
             }
 
-            // 4. Subtraction Facts (1 to 20 range, positive whole number answers)
+            // 4. Subtraction Facts (positive whole number facts bounded strictly to selected numbers)
             if (ops.includes('subtraction')) {
-                for (let num2 = 1; num2 <= 20; num2++) {
+                const maxSelected = (this.selectedTables && this.selectedTables.length > 0) ? Math.max(...this.selectedTables) : 12;
+                const subLimit = (maxSelected <= 2) ? maxSelected : (maxSelected <= 5 ? maxSelected : 12);
+                for (let num2 = 1; num2 <= subLimit; num2++) {
+                    if (maxSelected <= 2 && !this.selectedTables.includes(num2)) continue;
                     // (num1 + num2) - num1 = num2
                     deck.push({
                         op: '−',
@@ -144,8 +140,7 @@ class MathEngine {
                         answer: num2,
                         attempts: 0
                     });
-                    // Also subtraction where minuend <= 20
-                    if (num1 + num2 <= 20) {
+                    if (num1 !== num2) {
                         deck.push({
                             op: '−',
                             a: num1 + num2,
@@ -157,35 +152,6 @@ class MathEngine {
                 }
             }
         });
-
-        // Extra standalone 1..20 facts if only Addition / Subtraction are selected
-        if (ops.includes('addition') && !ops.includes('multiplication') && !ops.includes('division')) {
-            for (let i = 0; i < 20; i++) {
-                const r1 = Math.floor(Math.random() * 20) + 1;
-                const r2 = Math.floor(Math.random() * 20) + 1;
-                deck.push({
-                    op: '+',
-                    a: r1,
-                    b: r2,
-                    answer: r1 + r2,
-                    attempts: 0
-                });
-            }
-        }
-
-        if (ops.includes('subtraction') && !ops.includes('multiplication') && !ops.includes('division')) {
-            for (let i = 0; i < 20; i++) {
-                const a = Math.floor(Math.random() * 19) + 2; // 2..20
-                const b = Math.floor(Math.random() * (a - 1)) + 1; // 1..a-1
-                deck.push({
-                    op: '−',
-                    a: a,
-                    b: b,
-                    answer: a - b,
-                    attempts: 0
-                });
-            }
-        }
 
         // Fisher-Yates shuffle
         for (let i = deck.length - 1; i > 0; i--) {
@@ -265,7 +231,15 @@ class MathEngine {
                     attempts: 0
                 };
             } else if (opName === 'addition') {
-                const num2 = Math.floor(Math.random() * 20) + 1;
+                const maxSelected = Math.max(...tables);
+                let num2;
+                if (maxSelected <= 2) {
+                    num2 = tables[Math.floor(Math.random() * tables.length)];
+                } else if (maxSelected <= 5) {
+                    num2 = Math.floor(Math.random() * maxSelected) + 1;
+                } else {
+                    num2 = Math.floor(Math.random() * 12) + 1;
+                }
                 if (Math.random() < 0.5) {
                     candidate = {
                         op: '+',
@@ -284,25 +258,23 @@ class MathEngine {
                     };
                 }
             } else if (opName === 'subtraction') {
-                const num2 = Math.floor(Math.random() * 20) + 1;
-                const sum = num1 + num2;
-                if (sum <= 20 && Math.random() < 0.5) {
-                    candidate = {
-                        op: '−',
-                        a: sum,
-                        b: num2,
-                        answer: num1,
-                        attempts: 0
-                    };
+                const maxSelected = Math.max(...tables);
+                let num2;
+                if (maxSelected <= 2) {
+                    num2 = tables[Math.floor(Math.random() * tables.length)];
+                } else if (maxSelected <= 5) {
+                    num2 = Math.floor(Math.random() * maxSelected) + 1;
                 } else {
-                    candidate = {
-                        op: '−',
-                        a: sum,
-                        b: num1,
-                        answer: num2,
-                        attempts: 0
-                    };
+                    num2 = Math.floor(Math.random() * 12) + 1;
                 }
+                const sum = num1 + num2;
+                candidate = {
+                    op: '−',
+                    a: sum,
+                    b: num1,
+                    answer: num2,
+                    attempts: 0
+                };
             }
 
             if (!excludeProblem || !this.isSameProblem(candidate, excludeProblem)) {

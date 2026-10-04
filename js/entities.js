@@ -1085,6 +1085,8 @@ class ZombossZombie extends Zombie {
         this.name = '👑 DR. ZOMBOSS MECH';
         this.hasThrownImp = false;
         this.impThrowPending = false;
+        this.hasEjectedRunner = false;
+        this.ejectPending = false;
         this.thudTimer = 0;
         this.scale = 1.85;
         this.sparkTimer = 0;
@@ -1123,6 +1125,7 @@ class ZombossZombie extends Zombie {
         if (this.hp <= 0) {
             this.hp = 0;
             this.isDead = true;
+            this.ejectPending = true;
             return { killed: true, droppedArmor: false };
         }
 
@@ -1463,105 +1466,118 @@ class ZombossZombie extends Zombie {
         ctx.fill();
         ctx.stroke();
 
-        // Dr. Zomboss Body / White Lab Coat
-        ctx.fillStyle = '#ECEFF1';
-        ctx.strokeStyle = '#90A4AE';
-        ctx.lineWidth = 1.5;
-        roundRect(ctx, -9, -9, 18, 12, 3);
-        ctx.fill();
-        ctx.stroke();
+        if (!this.hasEjectedRunner) {
+            // Dr. Zomboss Body / White Lab Coat
+            ctx.fillStyle = '#ECEFF1';
+            ctx.strokeStyle = '#90A4AE';
+            ctx.lineWidth = 1.5;
+            roundRect(ctx, -9, -9, 18, 12, 3);
+            ctx.fill();
+            ctx.stroke();
 
-        // Lab coat buttons & collar
-        ctx.strokeStyle = '#37474F';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(0, -9); ctx.lineTo(0, 2);
-        ctx.stroke();
+            // Lab coat buttons & collar
+            ctx.strokeStyle = '#37474F';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, -9); ctx.lineTo(0, 2);
+            ctx.stroke();
 
-        // Steering Joysticks with Red Knobs (rocking back & forth!)
-        const joystickRock = Math.sin(this.walkCycle * 4) * 0.2;
-        // Left Joystick
-        ctx.save();
-        ctx.translate(-7, -1);
-        ctx.rotate(joystickRock);
-        ctx.strokeStyle = '#455A64'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -8); ctx.stroke();
-        ctx.fillStyle = '#E53935';
-        ctx.beginPath(); ctx.arc(0, -8, 2.5, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-        // Right Joystick
-        ctx.save();
-        ctx.translate(7, -1);
-        ctx.rotate(-joystickRock);
-        ctx.strokeStyle = '#455A64'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -8); ctx.stroke();
-        ctx.fillStyle = '#E53935';
-        ctx.beginPath(); ctx.arc(0, -8, 2.5, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
+            // Steering Joysticks with Red Knobs (rocking back & forth!)
+            const joystickRock = Math.sin(this.walkCycle * 4) * 0.2;
+            // Left Joystick
+            ctx.save();
+            ctx.translate(-7, -1);
+            ctx.rotate(joystickRock);
+            ctx.strokeStyle = '#455A64'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -8); ctx.stroke();
+            ctx.fillStyle = '#E53935';
+            ctx.beginPath(); ctx.arc(0, -8, 2.5, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+            // Right Joystick
+            ctx.save();
+            ctx.translate(7, -1);
+            ctx.rotate(-joystickRock);
+            ctx.strokeStyle = '#455A64'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -8); ctx.stroke();
+            ctx.fillStyle = '#E53935';
+            ctx.beginPath(); ctx.arc(0, -8, 2.5, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
 
-        // Dr. Zomboss Head (Giant bald cranium & brain folds!)
-        const zombossHeadY = -22 + (this.hitFlashTimer > 0 ? 3 : 0);
-        ctx.save();
-        ctx.translate(0, zombossHeadY);
+            // Dr. Zomboss Head (Giant bald cranium & brain folds!)
+            const zombossHeadY = -22 + (this.hitFlashTimer > 0 ? 3 : 0);
+            ctx.save();
+            ctx.translate(0, zombossHeadY);
 
-        // Huge Cranium
-        const brainGrad = ctx.createRadialGradient(-3, -4, 3, 0, -2, 14);
-        brainGrad.addColorStop(0, '#D4E157');
-        brainGrad.addColorStop(0.6, '#AFB42B');
-        brainGrad.addColorStop(1, '#827717');
-        ctx.fillStyle = brainGrad;
-        ctx.strokeStyle = '#33691E';
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        // Bulbous cranium shape: wider at top
-        ctx.ellipse(0, -2, 11, 13, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
+            // Huge Cranium
+            const brainGrad = ctx.createRadialGradient(-3, -4, 3, 0, -2, 14);
+            brainGrad.addColorStop(0, '#D4E157');
+            brainGrad.addColorStop(0.6, '#AFB42B');
+            brainGrad.addColorStop(1, '#827717');
+            ctx.fillStyle = brainGrad;
+            ctx.strokeStyle = '#33691E';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            // Bulbous cranium shape: wider at top
+            ctx.ellipse(0, -2, 11, 13, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
 
-        // Faint brain wrinkle / suture lines
-        ctx.strokeStyle = '#827717';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.arc(0, -7, 6, 0.2, Math.PI - 0.2, true);
-        ctx.moveTo(-5, -4); ctx.lineTo(-1, -7);
-        ctx.moveTo(5, -4); ctx.lineTo(1, -7);
-        ctx.stroke();
+            // Faint brain wrinkle / suture lines
+            ctx.strokeStyle = '#827717';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(0, -7, 6, 0.2, Math.PI - 0.2, true);
+            ctx.moveTo(-5, -4); ctx.lineTo(-1, -7);
+            ctx.moveTo(5, -4); ctx.lineTo(1, -7);
+            ctx.stroke();
 
-        // Pointy Zombie Ears
-        ctx.fillStyle = '#AFB42B';
-        ctx.beginPath();
-        ctx.moveTo(-11, 1); ctx.lineTo(-15, -1); ctx.lineTo(-10, 4);
-        ctx.moveTo(11, 1); ctx.lineTo(15, -1); ctx.lineTo(10, 4);
-        ctx.fill();
+            // Pointy Zombie Ears
+            ctx.fillStyle = '#AFB42B';
+            ctx.beginPath();
+            ctx.moveTo(-11, 1); ctx.lineTo(-15, -1); ctx.lineTo(-10, 4);
+            ctx.moveTo(11, 1); ctx.lineTo(15, -1); ctx.lineTo(10, 4);
+            ctx.fill();
 
-        // Bulging Zombie Eyes
-        ctx.fillStyle = '#FFFDE7';
-        ctx.strokeStyle = '#212121';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(-4, 1, 3.8, 0, Math.PI * 2);
-        ctx.arc(4, 1, 3.8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
+            // Bulging Zombie Eyes
+            ctx.fillStyle = '#FFFDE7';
+            ctx.strokeStyle = '#212121';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(-4, 1, 3.8, 0, Math.PI * 2);
+            ctx.arc(4, 1, 3.8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
 
-        // Pinpoint Pupils staring evilly forward
-        ctx.fillStyle = '#D50000';
-        ctx.beginPath();
-        ctx.arc(-4.5, 1.2, 1.3, 0, Math.PI * 2);
-        ctx.arc(3.5, 1.2, 1.3, 0, Math.PI * 2);
-        ctx.fill();
+            // Pinpoint Pupils staring evilly forward
+            ctx.fillStyle = '#D50000';
+            ctx.beginPath();
+            ctx.arc(-4.5, 1.2, 1.3, 0, Math.PI * 2);
+            ctx.arc(3.5, 1.2, 1.3, 0, Math.PI * 2);
+            ctx.fill();
 
-        // Wicked Manic Grin with Jagged Teeth
-        ctx.fillStyle = '#212121';
-        ctx.beginPath();
-        ctx.arc(0, 6, 4.5, 0, Math.PI);
-        ctx.fill();
+            // Wicked Manic Grin with Jagged Teeth
+            ctx.fillStyle = '#212121';
+            ctx.beginPath();
+            ctx.arc(0, 6, 4.5, 0, Math.PI);
+            ctx.fill();
 
-        ctx.fillStyle = '#FFEE58';
-        ctx.fillRect(-3, 6, 2, 2.5);
-        ctx.fillRect(1, 6, 2, 2.5);
+            ctx.fillStyle = '#FFEE58';
+            ctx.fillRect(-3, 6, 2, 2.5);
+            ctx.fillRect(1, 6, 2, 2.5);
 
-        ctx.restore(); // end Dr. Zomboss head
+            ctx.restore(); // end Dr. Zomboss head
+        } else {
+            // Empty cockpit hatch when Dr. Zomboss has ejected!
+            ctx.fillStyle = '#102027';
+            ctx.beginPath();
+            ctx.ellipse(0, 4, 12, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Smoke / severed joystick wires
+            ctx.strokeStyle = '#E53935'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(-4, 4); ctx.lineTo(-6, -2); ctx.stroke();
+            ctx.strokeStyle = '#1E88E5';
+            ctx.beginPath(); ctx.moveTo(4, 4); ctx.lineTo(6, -2); ctx.stroke();
+        }
         ctx.restore(); // end Dr. Zomboss cockpit
         ctx.restore(); // end Zombot head
 
@@ -1646,6 +1662,402 @@ class ZombossZombie extends Zombie {
         }
 
         ctx.restore(); // end entire mech
+    }
+}
+
+// ----------------------------------------------------
+// DR. ZOMBOSS ON FOOT (PHASE 2 - AFTER MECH DESTRUCTION)
+// ----------------------------------------------------
+class DrZombossRunner extends Zombie {
+    constructor(x, y, lane = 1, baseSpeed = 26) {
+        super(x, y, lane, 'zomboss_runner', baseSpeed);
+        this.hp = 6;
+        this.maxHp = 6;
+        this.isBoss = true;
+        this.isMegaBoss = true;
+        this.name = '👑 DR. ZOMBOSS (ON FOOT)';
+        this.scale = 1.35;
+
+        // Vault jump animation: leaps backward 30% towards spawn side
+        this.isJumping = true;
+        this.jumpStartX = x;
+        this.jumpStartY = y;
+        this.jumpTargetX = x + 300;
+        this.jumpTargetY = y;
+        this.jumpProgress = 0;
+        this.jumpDuration = 1.0;
+        this.jumpHeight = 110;
+        this.jumpArcY = 0;
+        this.hasLanded = false;
+
+        this.dustPuffs = [];
+    }
+
+    takeHit(damage, isIce = false, isLethal = false) {
+        const actualDamage = isLethal ? 999 : damage;
+        this.hp -= actualDamage;
+        this.hitFlashTimer = 0.18;
+        if (!isLethal) {
+            this.x += 10;
+            if (this.isJumping) {
+                this.jumpTargetX += 10;
+            }
+        }
+
+        if (isIce) {
+            this.isFrozen = true;
+            this.frozenTimer = 2.0;
+        }
+
+        if (this.hp <= 0) {
+            this.hp = 0;
+            this.isDead = true;
+            return { killed: true, droppedArmor: false };
+        }
+
+        return { killed: false, droppedArmor: false };
+    }
+
+    update(dt, speedMultiplier, attackThresholdX) {
+        if (this.isDead) {
+            this.deathTimer += dt;
+            return;
+        }
+
+        if (this.hitFlashTimer > 0) {
+            this.hitFlashTimer -= dt;
+        }
+
+        if (this.frozenTimer > 0) {
+            this.frozenTimer -= dt;
+            if (this.frozenTimer <= 0) {
+                this.isFrozen = false;
+            }
+        }
+
+        // Mid-air vault jump phase
+        if (this.isJumping) {
+            this.jumpProgress += dt / this.jumpDuration;
+            if (this.jumpProgress >= 1) {
+                this.jumpProgress = 1;
+                this.isJumping = false;
+                this.hasLanded = true;
+                this.x = this.jumpTargetX;
+                this.y = this.jumpTargetY;
+                this.jumpArcY = 0;
+                window.soundEffects.playBossThud();
+
+                // Spawn landing dust puff particles
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 * i) / 8;
+                    this.dustPuffs.push({
+                        x: 0,
+                        y: 35,
+                        vx: Math.cos(angle) * 45,
+                        vy: Math.sin(angle) * 15,
+                        life: 0.35,
+                        maxLife: 0.35,
+                        size: 4 + Math.random() * 3
+                    });
+                }
+            } else {
+                // Parabolic trajectory backward to target
+                this.x = this.jumpStartX + (this.jumpTargetX - this.jumpStartX) * this.jumpProgress;
+                this.y = this.jumpStartY + (this.jumpTargetY - this.jumpStartY) * this.jumpProgress;
+                this.jumpArcY = -Math.sin(this.jumpProgress * Math.PI) * this.jumpHeight;
+                this.walkCycle += dt * 14; // Flailing in mid-air
+            }
+        } else {
+            // Running on foot phase!
+            if (this.x <= attackThresholdX) {
+                this.isAttacking = true;
+                this.attackTimer += dt;
+            } else {
+                this.isAttacking = false;
+                const currentSpeed = this.isFrozen ? this.speed * 0.5 : this.speed;
+                this.x -= currentSpeed * speedMultiplier * dt;
+                this.walkCycle += dt * (currentSpeed / 12) * speedMultiplier;
+            }
+        }
+
+        // Update dust puffs
+        for (let i = this.dustPuffs.length - 1; i >= 0; i--) {
+            const p = this.dustPuffs[i];
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            if (p.life <= 0) {
+                this.dustPuffs.splice(i, 1);
+            }
+        }
+    }
+
+    render(ctx) {
+        ctx.save();
+
+        // 1. Dynamic Ground Shadow (Stays firmly on lawn even when Dr. Zomboss is high in air!)
+        const shadowScale = this.isJumping ? Math.max(0.4, 1 - Math.abs(this.jumpArcY) / 160) : 1;
+        const shadowAlpha = this.isJumping ? Math.max(0.12, 0.35 * shadowScale) : 0.38;
+        ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha})`;
+        ctx.beginPath();
+        ctx.ellipse(this.x, this.y + 36, 18 * shadowScale * this.scale, 7 * shadowScale * this.scale, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Dust puffs at ground level
+        for (const p of this.dustPuffs) {
+            const alpha = Math.max(0, p.life / p.maxLife);
+            ctx.fillStyle = `rgba(215, 204, 200, ${alpha * 0.8})`;
+            ctx.beginPath();
+            ctx.arc(this.x + p.x, this.y + p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 2. Render Dr. Zomboss Model
+        ctx.translate(this.x, this.y + this.jumpArcY);
+        ctx.scale(this.scale, this.scale);
+
+        if (this.isDead) {
+            const alpha = Math.max(0, 1 - this.deathTimer * 2.0);
+            ctx.globalAlpha = alpha;
+            ctx.rotate(this.deathTimer * 2.8);
+            ctx.translate(0, this.deathTimer * 25);
+        }
+
+        if (this.hitFlashTimer > 0) {
+            ctx.filter = 'brightness(2.2)';
+        } else if (this.isFrozen) {
+            ctx.filter = 'hue-rotate(160deg) saturate(1.8)';
+        }
+
+        // Animation dynamics
+        const isVaulting = this.isJumping;
+        const limp = Math.sin(this.walkCycle * 2.4);
+        const legSwing = isVaulting ? 0.6 : Math.sin(this.walkCycle * 2.4) * 0.45;
+        const armSwing = isVaulting ? -0.8 : Math.cos(this.walkCycle * 2.4) * 0.55;
+        const coatFlutter = isVaulting ? 0.45 : Math.sin(this.walkCycle * 2.4) * 0.25;
+
+        // Slight forward lean when sprinting, or backward lean when vaulting
+        const torsoTilt = isVaulting ? -0.22 : 0.15;
+        ctx.rotate(torsoTilt);
+
+        // A. Back Leg (Dark Charcoal Trousers + Shiny Black Oxford Shoe)
+        ctx.save();
+        ctx.translate(-5, 14);
+        ctx.rotate(-legSwing);
+        ctx.fillStyle = '#37474F';
+        roundRect(ctx, -3.5, 0, 7, 18, 2);
+        ctx.fill();
+        // Black dress shoe
+        ctx.fillStyle = '#102027';
+        roundRect(ctx, -6, 15, 11, 6, 2);
+        ctx.fill();
+        ctx.restore();
+
+        // B. Billowing White Lab Coat - Back Flap
+        ctx.save();
+        ctx.translate(2, 6);
+        ctx.rotate(coatFlutter);
+        ctx.fillStyle = '#CFD8DC'; // Slightly shadowed inner coat
+        ctx.beginPath();
+        ctx.moveTo(-7, 0);
+        ctx.lineTo(-14, 18);
+        ctx.lineTo(-2, 16);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // C. Front Leg (Dark Charcoal Trousers + Shoe)
+        ctx.save();
+        ctx.translate(5, 14);
+        ctx.rotate(legSwing);
+        ctx.fillStyle = '#263238';
+        roundRect(ctx, -3.5, 0, 7, 18, 2);
+        ctx.fill();
+        // Black dress shoe
+        ctx.fillStyle = '#102027';
+        roundRect(ctx, -6, 15, 11, 6, 2);
+        ctx.fill();
+        ctx.restore();
+
+        // D. Torso & White Lab Coat
+        // White coat base
+        ctx.fillStyle = '#ECEFF1';
+        ctx.strokeStyle = '#90A4AE';
+        ctx.lineWidth = 1.2;
+        roundRect(ctx, -10, -4, 20, 22, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // Dark shirt / tie underneath
+        ctx.fillStyle = '#455A64';
+        ctx.fillRect(-3, -4, 6, 9);
+        // Red tie
+        ctx.fillStyle = '#D32F2F';
+        ctx.beginPath();
+        ctx.moveTo(0, -3);
+        ctx.lineTo(2, 5);
+        ctx.lineTo(0, 7);
+        ctx.lineTo(-2, 5);
+        ctx.closePath();
+        ctx.fill();
+
+        // Lab coat lapels (V-neck opening)
+        ctx.fillStyle = '#FAFAFA';
+        ctx.strokeStyle = '#B0BEC5';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-8, -4);
+        ctx.lineTo(-3, 6);
+        ctx.lineTo(-8, 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(8, -4);
+        ctx.lineTo(3, 6);
+        ctx.lineTo(8, 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Coat Buttons
+        ctx.fillStyle = '#90A4AE';
+        ctx.beginPath();
+        ctx.arc(0, 9, 1.2, 0, Math.PI * 2);
+        ctx.arc(0, 14, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Breast pocket with red & blue pens!
+        ctx.fillStyle = '#CFD8DC';
+        ctx.fillRect(4, 2, 4.5, 5);
+        ctx.fillStyle = '#E53935'; // Red pen
+        ctx.fillRect(4.8, 0, 1.2, 2.5);
+        ctx.fillStyle = '#1E88E5'; // Blue pen
+        ctx.fillRect(6.6, -0.5, 1.2, 3);
+
+        // Flapping lab coat tails (outer layer)
+        ctx.save();
+        ctx.translate(-5, 16);
+        ctx.rotate(coatFlutter * 1.2);
+        ctx.fillStyle = '#ECEFF1';
+        ctx.strokeStyle = '#90A4AE';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-5, 0);
+        ctx.lineTo(-12, 10);
+        ctx.lineTo(1, 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // E. Back Arm (Flailing when jumping, pumping when running)
+        ctx.save();
+        ctx.translate(-7, -1);
+        ctx.rotate(-armSwing);
+        ctx.fillStyle = '#ECEFF1';
+        roundRect(ctx, -3, 0, 6, 14, 2.5);
+        ctx.fill();
+        // Zombie pale hand
+        ctx.fillStyle = '#AFB42B';
+        ctx.beginPath();
+        ctx.arc(0, 15, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // F. Front Arm
+        ctx.save();
+        ctx.translate(7, -1);
+        ctx.rotate(armSwing);
+        ctx.fillStyle = '#ECEFF1';
+        ctx.strokeStyle = '#B0BEC5';
+        ctx.lineWidth = 1;
+        roundRect(ctx, -3, 0, 6, 14, 2.5);
+        ctx.fill();
+        ctx.stroke();
+        // Zombie pale hand
+        ctx.fillStyle = '#AFB42B';
+        ctx.beginPath();
+        ctx.arc(0, 15, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // G. Head: Dr. Edgar Zomboss Cranium!
+        ctx.save();
+        ctx.translate(0, -18 + limp * 1.2);
+
+        // Bulbous oversized brain cranium
+        const brainGrad = ctx.createRadialGradient(-3, -4, 3, 0, -2, 15);
+        brainGrad.addColorStop(0, '#D4E157');
+        brainGrad.addColorStop(0.6, '#AFB42B');
+        brainGrad.addColorStop(1, '#827717');
+        ctx.fillStyle = brainGrad;
+        ctx.strokeStyle = '#33691E';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.ellipse(0, -3, 13, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Brain suture wrinkles
+        ctx.strokeStyle = '#827717';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(0, -9, 7, 0.2, Math.PI - 0.2, true);
+        ctx.moveTo(-6, -5); ctx.lineTo(-1, -9);
+        ctx.moveTo(6, -5); ctx.lineTo(1, -9);
+        ctx.stroke();
+
+        // Pointy Zombie Ears
+        ctx.fillStyle = '#AFB42B';
+        ctx.beginPath();
+        ctx.moveTo(-13, 0); ctx.lineTo(-18, -2); ctx.lineTo(-12, 4);
+        ctx.moveTo(13, 0); ctx.lineTo(18, -2); ctx.lineTo(12, 4);
+        ctx.fill();
+
+        // Bulging Zombie Eyes
+        ctx.fillStyle = '#FFFDE7';
+        ctx.strokeStyle = '#212121';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(-4.8, 1, 4.2, 0, Math.PI * 2);
+        ctx.arc(4.8, 1, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Fierce red pinpoint pupils
+        ctx.fillStyle = '#D50000';
+        ctx.beginPath();
+        ctx.arc(-5.2, 1.2, 1.5, 0, Math.PI * 2);
+        ctx.arc(4.4, 1.2, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wicked Manic Grimace / Open Mouth
+        if (isVaulting) {
+            // Frantic screaming open mouth while in mid-air
+            ctx.fillStyle = '#212121';
+            ctx.beginPath();
+            ctx.ellipse(0, 8, 5, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Sharp teeth
+            ctx.fillStyle = '#FFEE58';
+            ctx.fillRect(-3, 5, 2, 2.5);
+            ctx.fillRect(1, 5, 2, 2.5);
+        } else {
+            // Manic sneer with yellow teeth while sprinting
+            ctx.fillStyle = '#212121';
+            ctx.beginPath();
+            ctx.arc(0, 7, 5, 0, Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#FFEE58';
+            ctx.fillRect(-3.5, 7, 2.2, 2.5);
+            ctx.fillRect(1.3, 7, 2.2, 2.5);
+        }
+
+        ctx.restore(); // end head
+        ctx.restore(); // end model
+        ctx.restore(); // end all
     }
 }
 

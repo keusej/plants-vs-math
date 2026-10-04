@@ -966,6 +966,28 @@ class MathDefenseGame {
         }
     }
 
+    checkZombossEjection(z) {
+        if (z && z.type === 'zomboss' && !z.hasEjectedRunner) {
+            z.hasEjectedRunner = true;
+            const intactLanes = this.getDefendedLanes();
+            let runnerLane = z.lane;
+            if (intactLanes.length > 0 && !intactLanes.includes(runnerLane)) {
+                runnerLane = intactLanes[0];
+            }
+            const runner = new DrZombossRunner(z.x, z.y, runnerLane, 26);
+            runner.jumpStartX = z.x;
+            runner.jumpStartY = z.y;
+            runner.jumpTargetX = Math.min(this.baseWidth - 60, z.x + this.baseWidth * 0.30);
+            runner.jumpTargetY = this.laneHeights[runnerLane] - 10;
+            this.zombies.push(runner);
+            this.waveTotalZombies++;
+            this.screenShake = 22;
+            window.soundEffects.playImpThrow();
+            this.particles.addFloatingText('💥 MECH DESTROYED! DR. ZOMBOSS JUMPS OFF! 🏃💨', z.x - 30, z.y - 70, '#FF1744', 24);
+            this.particles.addExplosion(z.x, z.y, 45);
+        }
+    }
+
     announceWave(text) {
         const banner = document.getElementById('waveBanner');
         if (banner) {
@@ -1047,7 +1069,7 @@ class MathDefenseGame {
             let minZX = Infinity;
             for (const z of this.zombies) {
                 const hitRadius = z.isBoss ? 45 : 28;
-                if (!z.isDead && z.lane === pea.lane && Math.abs(z.x - pea.x) < hitRadius) {
+                if (!z.isDead && !z.isJumping && z.lane === pea.lane && Math.abs(z.x - pea.x) < hitRadius) {
                     // If this is a Super Barrage pea and z is a Boss who already took 1 pea damage from this barrage:
                     if (pea.isSuperBarrage && z.isBoss && z.lastSuperBarrageId === pea.barrageId) {
                         continue; // Bypasses boss to hit remaining zombies behind him!
@@ -1083,7 +1105,11 @@ class MathDefenseGame {
                         this.score += 1500;
                         this.screenShake = 16;
                         window.soundEffects.playVictory();
-                        this.particles.addFloatingText('👑 BOSS DEFEATED! +1500', z.x, z.y - 50, '#FFD700', 30);
+                        if (z.type === 'zomboss_runner') {
+                            this.particles.addFloatingText('👑 DR. ZOMBOSS DEFEATED! +1500', z.x, z.y - 50, '#FFD700', 30);
+                        } else {
+                            this.particles.addFloatingText('👑 BOSS DEFEATED! +1500', z.x, z.y - 50, '#FFD700', 30);
+                        }
                         // Drop 3 Sun Orbs!
                         this.spawnSun(z.x - 30, z.y - 15);
                         this.spawnSun(z.x, z.y + 10);
@@ -1093,6 +1119,7 @@ class MathDefenseGame {
                         this.particles.addFloatingText('+250', z.x, z.y - 20, '#FFEB3B', 22);
                         this.spawnSun(z.x, z.y);
                     }
+                    this.checkZombossEjection(z);
                 }
 
                 this.peas.splice(i, 1);
@@ -1133,6 +1160,12 @@ class MathDefenseGame {
                 this.waveTotalZombies++;
                 this.particles.addFloatingText('IMP LAUNCHED! 🚀', impX, impY - 30, '#FF9100', 22);
                 this.particles.addSplat(impX, impY, '#FFEB3B', 16);
+            }
+
+            // Check if Dr. Zomboss Mech is destroyed and ejects Dr. Zomboss on foot!
+            if (z.ejectPending) {
+                z.ejectPending = false;
+                this.checkZombossEjection(z);
             }
 
             if (z.isDead && z.deathTimer > 0.8) {
@@ -1205,21 +1238,26 @@ class MathDefenseGame {
                 this.removePlant(mower.lane);
 
                 // Kill all zombies in this lane in contact
-                for (const z of this.zombies) {
-                    if (!z.isDead && z.lane === mower.lane && Math.abs(z.x - mower.x) < 40) {
+                for (const z of this.zombies.slice()) {
+                    if (!z.isDead && !z.isJumping && z.lane === mower.lane && Math.abs(z.x - mower.x) < 40) {
                         const hitResult = z.takeHit(999, false, true);
                         if (hitResult.killed) {
                             this.waveKilledZombies++;
                             this.particles.addSplat(z.x, z.y, '#76FF03', 24);
                             if (z.isBoss) {
                                 this.score += 1500;
-                                this.particles.addFloatingText('CRUSHED! +1500', z.x, z.y - 30, '#F44336', 28);
+                                if (z.type === 'zomboss_runner') {
+                                    this.particles.addFloatingText('👑 DR. ZOMBOSS CRUSHED! +1500', z.x, z.y - 30, '#F44336', 28);
+                                } else {
+                                    this.particles.addFloatingText('CRUSHED! +1500', z.x, z.y - 30, '#F44336', 28);
+                                }
                                 this.spawnSun(z.x - 20, z.y);
                                 this.spawnSun(z.x + 20, z.y);
                             } else {
                                 this.particles.addFloatingText('SPLAT!', z.x, z.y - 20, '#F44336', 22);
                                 this.spawnSun(z.x, z.y);
                             }
+                            this.checkZombossEjection(z);
                         }
                     }
                 }
@@ -1238,8 +1276,8 @@ class MathDefenseGame {
                 this.particles.addExplosion(cb.x, cb.y, cb.radius);
 
                 // Blast zombies in radius!
-                for (const z of this.zombies) {
-                    if (!z.isDead) {
+                for (const z of this.zombies.slice()) {
+                    if (!z.isDead && !z.isJumping) {
                         const dx = z.x - cb.x;
                         const dy = z.y - cb.y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -1251,13 +1289,18 @@ class MathDefenseGame {
                                     this.score += 1500;
                                     this.screenShake = 18;
                                     window.soundEffects.playVictory();
-                                    this.particles.addFloatingText('BOSS BOOMED! +1500', z.x, z.y - 50, '#FFD700', 30);
+                                    if (z.type === 'zomboss_runner') {
+                                        this.particles.addFloatingText('👑 DR. ZOMBOSS BOOMED! +1500', z.x, z.y - 50, '#FFD700', 30);
+                                    } else {
+                                        this.particles.addFloatingText('BOSS BOOMED! +1500', z.x, z.y - 50, '#FFD700', 30);
+                                    }
                                     // Note: Cherry Bomb kills do NOT drop sun points to preserve challenge!
                                 } else {
                                     this.score += 300;
                                     this.particles.addFloatingText('+300', z.x, z.y - 20, '#FFEB3B', 22);
                                     // Note: Cherry Bomb kills do NOT drop sun points to preserve challenge!
                                 }
+                                this.checkZombossEjection(z);
                             } else if (z.isBoss) {
                                 // Boss took 6 damage from Cherry Bomb!
                                 this.particles.addFloatingText('CRITICAL -6 HP!', z.x, z.y - 45, '#FF5252', 24);
@@ -1282,21 +1325,26 @@ class MathDefenseGame {
                 this.particles.addChiliInferno(this.laneHeights, this.mowerX, this.baseWidth);
 
                 // Blast and incinerate ALL active zombies across the entire board!
-                for (const z of this.zombies) {
-                    if (!z.isDead) {
+                for (const z of this.zombies.slice()) {
+                    if (!z.isDead && !z.isJumping) {
                         const hitResult = z.takeHit(999, false, true); // true forces lethal damage even on boss!
                         if (hitResult.killed) {
                             this.waveKilledZombies++;
                             if (z.isBoss) {
                                 this.score += 2000;
                                 window.soundEffects.playVictory();
-                                this.particles.addFloatingText('BOSS INCINERATED! +2000', z.x, z.y - 50, '#FFD700', 32);
+                                if (z.type === 'zomboss_runner') {
+                                    this.particles.addFloatingText('👑 DR. ZOMBOSS INCINERATED! +2000', z.x, z.y - 50, '#FFD700', 32);
+                                } else {
+                                    this.particles.addFloatingText('BOSS INCINERATED! +2000', z.x, z.y - 50, '#FFD700', 32);
+                                }
                             } else {
                                 this.score += 350;
                                 this.particles.addFloatingText('+350', z.x, z.y - 20, '#FF5722', 22);
                             }
                             // Fiery explosion at each incinerated zombie
                             this.particles.addExplosion(z.x, z.y, 75);
+                            this.checkZombossEjection(z);
                         }
                     }
                 }
@@ -1315,9 +1363,9 @@ class MathDefenseGame {
             }
 
             // Check collision with zombies in the exact same lane
-            for (const z of this.zombies) {
+            for (const z of this.zombies.slice()) {
                 const hitDist = z.isBoss ? 38 : 26;
-                if (!z.isDead && z.lane === mine.lane && Math.abs(z.x - mine.x) < hitDist) {
+                if (!z.isDead && !z.isJumping && z.lane === mine.lane && Math.abs(z.x - mine.x) < hitDist) {
                     // Detonate Potato Mine!
                     mine.dead = true;
                     this.screenShake = 12;
@@ -1333,13 +1381,18 @@ class MathDefenseGame {
                             this.score += 1500;
                             this.screenShake = 18;
                             window.soundEffects.playVictory();
-                            this.particles.addFloatingText('BOSS BLASTED! +1500', z.x, z.y - 50, '#FFD700', 30);
-                            // Note: Potato Mine kills do NOT drop sun points to preserve challenge!
+                            if (z.type === 'zomboss_runner') {
+                                this.particles.addFloatingText('👑 DR. ZOMBOSS BLASTED! +1500', z.x, z.y - 50, '#FFD700', 30);
+                            } else {
+                                this.particles.addFloatingText('BOSS BLASTED! +1500', z.x, z.y - 50, '#FFD700', 30);
+                            }
+                            this.spawnSun(z.x - 20, z.y);
                         } else {
                             this.score += 250;
                             this.particles.addFloatingText('+250', z.x, z.y - 20, '#FFEB3B', 22);
                             // Note: Potato Mine kills do NOT drop sun points to preserve challenge!
                         }
+                        this.checkZombossEjection(z);
                     } else if (z.isBoss) {
                         this.particles.addFloatingText('CRITICAL -6 HP!', z.x, z.y - 45, '#FF5252', 24);
                         this.particles.addExplosion(z.x, z.y, 35);
@@ -1986,7 +2039,11 @@ class MathDefenseGame {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
         let bossStatus = isEnraged ? '🔥 ENRAGED GARGANTUAR' : '🧟 GARGANTUAR BOSS';
         if (boss.isMegaBoss) {
-            bossStatus = isEnraged ? '🔥 CRITICAL CORE: DR. ZOMBOSS' : '👑 DR. ZOMBOSS MECH';
+            if (boss.type === 'zomboss_runner') {
+                bossStatus = '👑 DR. ZOMBOSS (ON FOOT!) 🏃';
+            } else {
+                bossStatus = isEnraged ? '🔥 CRITICAL CORE: DR. ZOMBOSS' : '👑 DR. ZOMBOSS MECH';
+            }
         }
         ctx.fillText(bossStatus, barX + 12, barY + barH / 2 + 1);
 
