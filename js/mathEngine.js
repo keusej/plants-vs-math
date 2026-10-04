@@ -7,6 +7,7 @@ class MathEngine {
     constructor() {
         this.selectedTables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
         this.selectedOperations = ['addition', 'subtraction', 'multiplication', 'division']; // default all active
+        this.addSubRange = 'within20'; // 'within10', 'within20', 'tens', 'within50', 'within100'
         this.mode = 'multiplication'; // backward compatibility
         this.currentProblem = null;
         this.lastProblem = null;
@@ -78,80 +79,195 @@ class MathEngine {
         this.generateQueue();
     }
 
+    setAddSubtractRange(range) {
+        this.lastProblem = null;
+        const valid = ['within10', 'within20', 'tens', 'within50', 'within100'];
+        this.addSubRange = valid.includes(range) ? range : 'within20';
+        this.generateQueue();
+    }
+
     generateQueue() {
         const deck = [];
         const ops = this.selectedOperations || ['multiplication'];
+        const range = this.addSubRange || 'within20';
+        const isMixedOrTables = ops.includes('multiplication') || ops.includes('division');
 
-        // Generate problems across the selected tables
-        this.selectedTables.forEach(num1 => {
-            // 1. Multiplication Facts (1 to 12)
-            if (ops.includes('multiplication')) {
-                for (let num2 = 1; num2 <= 12; num2++) {
-                    deck.push({
-                        op: '×',
-                        a: num1,
-                        b: num2,
-                        answer: num1 * num2,
-                        attempts: 0
-                    });
+        // Standalone Mental Math modes when only Addition and/or Subtraction are active
+        if (!isMixedOrTables && (range === 'tens' || range === 'within50' || range === 'within100')) {
+            if (range === 'tens') {
+                const multiples = [10, 20, 30, 40, 50, 60, 70, 80];
+                for (const t1 of multiples) {
+                    for (const t2 of multiples) {
+                        if (t1 + t2 <= 100) {
+                            if (ops.includes('addition')) {
+                                deck.push({ op: '+', a: t1, b: t2, answer: t1 + t2, attempts: 0 });
+                            }
+                            if (ops.includes('subtraction')) {
+                                deck.push({ op: '−', a: t1 + t2, b: t1, answer: t2, attempts: 0 });
+                            }
+                        }
+                    }
+                }
+            } else if (range === 'within50') {
+                // Generate 40 vibrant 2-digit problems with sums up to 50
+                for (let k = 0; k < 40; k++) {
+                    const a = Math.floor(Math.random() * 26) + 12; // 12..37
+                    const maxB = 50 - a;
+                    const minB = 5;
+                    const b = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                    if (ops.includes('addition')) {
+                        deck.push({ op: '+', a, b, answer: a + b, attempts: 0 });
+                    }
+                    if (ops.includes('subtraction')) {
+                        deck.push({ op: '−', a: a + b, b, answer: a, attempts: 0 });
+                    }
+                }
+            } else if (range === 'within100') {
+                // Generate 50 vibrant 2-digit problems with sums up to 100
+                for (let k = 0; k < 50; k++) {
+                    const a = Math.floor(Math.random() * 45) + 16; // 16..60
+                    const maxB = 100 - a;
+                    const minB = 10;
+                    const b = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                    if (ops.includes('addition')) {
+                        deck.push({ op: '+', a, b, answer: a + b, attempts: 0 });
+                    }
+                    if (ops.includes('subtraction')) {
+                        deck.push({ op: '−', a: a + b, b, answer: a, attempts: 0 });
+                    }
                 }
             }
-
-            // 2. Division Facts (Dividend up to 144, Divisor 1-12, Quotient 1-12)
-            if (ops.includes('division')) {
-                for (let num2 = 1; num2 <= 12; num2++) {
-                    deck.push({
-                        op: '÷',
-                        a: num1 * num2,
-                        b: num1,
-                        answer: num2,
-                        attempts: 0
-                    });
-                }
-            }
-
-            // 3. Addition Facts (bounded strictly to selected numbers)
-            if (ops.includes('addition')) {
-                const maxSelected = (this.selectedTables && this.selectedTables.length > 0) ? Math.max(...this.selectedTables) : 12;
-                const addLimit = (maxSelected <= 2) ? maxSelected : (maxSelected <= 5 ? maxSelected : 12);
-                for (let num2 = 1; num2 <= addLimit; num2++) {
-                    if (maxSelected <= 2 && !this.selectedTables.includes(num2)) continue;
-                    deck.push({
-                        op: '+',
-                        a: num1,
-                        b: num2,
-                        answer: num1 + num2,
-                        attempts: 0
-                    });
-                }
-            }
-
-            // 4. Subtraction Facts (positive whole number facts bounded strictly to selected numbers)
-            if (ops.includes('subtraction')) {
-                const maxSelected = (this.selectedTables && this.selectedTables.length > 0) ? Math.max(...this.selectedTables) : 12;
-                const subLimit = (maxSelected <= 2) ? maxSelected : (maxSelected <= 5 ? maxSelected : 12);
-                for (let num2 = 1; num2 <= subLimit; num2++) {
-                    if (maxSelected <= 2 && !this.selectedTables.includes(num2)) continue;
-                    // (num1 + num2) - num1 = num2
-                    deck.push({
-                        op: '−',
-                        a: num1 + num2,
-                        b: num1,
-                        answer: num2,
-                        attempts: 0
-                    });
-                    if (num1 !== num2) {
+        } else {
+            // Generate problems across the selected tables
+            this.selectedTables.forEach(num1 => {
+                // 1. Multiplication Facts (1 to 12)
+                if (ops.includes('multiplication')) {
+                    for (let num2 = 1; num2 <= 12; num2++) {
                         deck.push({
-                            op: '−',
-                            a: num1 + num2,
+                            op: '×',
+                            a: num1,
                             b: num2,
-                            answer: num1,
+                            answer: num1 * num2,
                             attempts: 0
                         });
                     }
                 }
-            }
-        });
+
+                // 2. Division Facts (Dividend up to 144, Divisor 1-12, Quotient 1-12)
+                if (ops.includes('division')) {
+                    for (let num2 = 1; num2 <= 12; num2++) {
+                        deck.push({
+                            op: '÷',
+                            a: num1 * num2,
+                            b: num1,
+                            answer: num2,
+                            attempts: 0
+                        });
+                    }
+                }
+
+                // 3. Addition Facts
+                if (ops.includes('addition')) {
+                    if (range === 'within10') {
+                        // Sums strictly <= 10
+                        const maxSelected = (this.selectedTables && this.selectedTables.length > 0) ? Math.max(...this.selectedTables) : 10;
+                        if (maxSelected <= 2) {
+                            for (const num2 of this.selectedTables) {
+                                deck.push({ op: '+', a: num1, b: num2, answer: num1 + num2, attempts: 0 });
+                            }
+                        } else if (num1 < 10) {
+                            const addLimit = Math.min(10 - num1, (maxSelected <= 5 ? maxSelected : 9));
+                            for (let num2 = 1; num2 <= addLimit; num2++) {
+                                deck.push({ op: '+', a: num1, b: num2, answer: num1 + num2, attempts: 0 });
+                            }
+                        }
+                    } else if (range === 'within50') {
+                        // In mixed mode with within50
+                        const maxB = 50 - num1;
+                        const minB = 5;
+                        const num2 = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                        deck.push({ op: '+', a: num1, b: num2, answer: num1 + num2, attempts: 0 });
+                    } else if (range === 'within100') {
+                        // In mixed mode with within100
+                        const maxB = 100 - num1;
+                        const minB = 10;
+                        const num2 = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                        deck.push({ op: '+', a: num1, b: num2, answer: num1 + num2, attempts: 0 });
+                    } else {
+                        // 'within20' (Standard single-digit facts)
+                        const maxSelected = (this.selectedTables && this.selectedTables.length > 0) ? Math.max(...this.selectedTables) : 12;
+                        const addLimit = (maxSelected <= 2) ? maxSelected : (maxSelected <= 5 ? maxSelected : 12);
+                        for (let num2 = 1; num2 <= addLimit; num2++) {
+                            if (maxSelected <= 2 && !this.selectedTables.includes(num2)) continue;
+                            deck.push({
+                                op: '+',
+                                a: num1,
+                                b: num2,
+                                answer: num1 + num2,
+                                attempts: 0
+                            });
+                        }
+                    }
+                }
+
+                // 4. Subtraction Facts
+                if (ops.includes('subtraction')) {
+                    if (range === 'within10') {
+                        // Subtractions where minuend <= 10
+                        const maxSelected = (this.selectedTables && this.selectedTables.length > 0) ? Math.max(...this.selectedTables) : 10;
+                        if (maxSelected <= 2) {
+                            for (const num2 of this.selectedTables) {
+                                deck.push({ op: '−', a: num1 + num2, b: num1, answer: num2, attempts: 0 });
+                                if (num1 !== num2) {
+                                    deck.push({ op: '−', a: num1 + num2, b: num2, answer: num1, attempts: 0 });
+                                }
+                            }
+                        } else if (num1 < 10) {
+                            const subLimit = Math.min(10 - num1, (maxSelected <= 5 ? maxSelected : 9));
+                            for (let num2 = 1; num2 <= subLimit; num2++) {
+                                deck.push({ op: '−', a: num1 + num2, b: num1, answer: num2, attempts: 0 });
+                                if (num1 !== num2) {
+                                    deck.push({ op: '−', a: num1 + num2, b: num2, answer: num1, attempts: 0 });
+                                }
+                            }
+                        }
+                    } else if (range === 'within50') {
+                        const maxB = 50 - num1;
+                        const minB = 5;
+                        const num2 = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                        deck.push({ op: '−', a: num1 + num2, b: num2, answer: num1, attempts: 0 });
+                    } else if (range === 'within100') {
+                        const maxB = 100 - num1;
+                        const minB = 10;
+                        const num2 = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                        deck.push({ op: '−', a: num1 + num2, b: num2, answer: num1, attempts: 0 });
+                    } else {
+                        // 'within20' (Standard single-digit facts)
+                        const maxSelected = (this.selectedTables && this.selectedTables.length > 0) ? Math.max(...this.selectedTables) : 12;
+                        const subLimit = (maxSelected <= 2) ? maxSelected : (maxSelected <= 5 ? maxSelected : 12);
+                        for (let num2 = 1; num2 <= subLimit; num2++) {
+                            if (maxSelected <= 2 && !this.selectedTables.includes(num2)) continue;
+                            deck.push({
+                                op: '−',
+                                a: num1 + num2,
+                                b: num1,
+                                answer: num2,
+                                attempts: 0
+                            });
+                            if (num1 !== num2) {
+                                deck.push({
+                                    op: '−',
+                                    a: num1 + num2,
+                                    b: num2,
+                                    answer: num1,
+                                    attempts: 0
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         // Fisher-Yates shuffle
         for (let i = deck.length - 1; i > 0; i--) {
@@ -231,50 +347,112 @@ class MathEngine {
                     attempts: 0
                 };
             } else if (opName === 'addition') {
-                const maxSelected = Math.max(...tables);
-                let num2;
-                if (maxSelected <= 2) {
-                    num2 = tables[Math.floor(Math.random() * tables.length)];
-                } else if (maxSelected <= 5) {
-                    num2 = Math.floor(Math.random() * maxSelected) + 1;
+                const range = this.addSubRange || 'within20';
+                if (range === 'tens') {
+                    const multiples = [10, 20, 30, 40, 50, 60, 70, 80];
+                    const t1 = multiples[Math.floor(Math.random() * multiples.length)];
+                    const validT2 = multiples.filter(t => t1 + t <= 100);
+                    const t2 = validT2[Math.floor(Math.random() * validT2.length)] || 10;
+                    candidate = { op: '+', a: t1, b: t2, answer: t1 + t2, attempts: 0 };
+                } else if (range === 'within10') {
+                    const maxSelected = Math.max(...tables);
+                    let num2;
+                    if (maxSelected <= 2) {
+                        num2 = tables[Math.floor(Math.random() * tables.length)];
+                    } else {
+                        const maxB = Math.max(1, 10 - num1);
+                        num2 = Math.floor(Math.random() * maxB) + 1;
+                    }
+                    candidate = { op: '+', a: num1, b: num2, answer: num1 + num2, attempts: 0 };
+                } else if (range === 'within50') {
+                    const a = Math.floor(Math.random() * 26) + 12; // 12..37
+                    const maxB = 50 - a;
+                    const minB = 5;
+                    const b = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                    candidate = { op: '+', a, b, answer: a + b, attempts: 0 };
+                } else if (range === 'within100') {
+                    const a = Math.floor(Math.random() * 45) + 16; // 16..60
+                    const maxB = 100 - a;
+                    const minB = 10;
+                    const b = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                    candidate = { op: '+', a, b, answer: a + b, attempts: 0 };
                 } else {
-                    num2 = Math.floor(Math.random() * 12) + 1;
-                }
-                if (Math.random() < 0.5) {
-                    candidate = {
-                        op: '+',
-                        a: num1,
-                        b: num2,
-                        answer: num1 + num2,
-                        attempts: 0
-                    };
-                } else {
-                    candidate = {
-                        op: '+',
-                        a: num2,
-                        b: num1,
-                        answer: num2 + num1,
-                        attempts: 0
-                    };
+                    const maxSelected = Math.max(...tables);
+                    let num2;
+                    if (maxSelected <= 2) {
+                        num2 = tables[Math.floor(Math.random() * tables.length)];
+                    } else if (maxSelected <= 5) {
+                        num2 = Math.floor(Math.random() * maxSelected) + 1;
+                    } else {
+                        num2 = Math.floor(Math.random() * 12) + 1;
+                    }
+                    if (Math.random() < 0.5) {
+                        candidate = {
+                            op: '+',
+                            a: num1,
+                            b: num2,
+                            answer: num1 + num2,
+                            attempts: 0
+                        };
+                    } else {
+                        candidate = {
+                            op: '+',
+                            a: num2,
+                            b: num1,
+                            answer: num2 + num1,
+                            attempts: 0
+                        };
+                    }
                 }
             } else if (opName === 'subtraction') {
-                const maxSelected = Math.max(...tables);
-                let num2;
-                if (maxSelected <= 2) {
-                    num2 = tables[Math.floor(Math.random() * tables.length)];
-                } else if (maxSelected <= 5) {
-                    num2 = Math.floor(Math.random() * maxSelected) + 1;
+                const range = this.addSubRange || 'within20';
+                if (range === 'tens') {
+                    const multiples = [10, 20, 30, 40, 50, 60, 70, 80];
+                    const t1 = multiples[Math.floor(Math.random() * multiples.length)];
+                    const validT2 = multiples.filter(t => t1 + t <= 100);
+                    const t2 = validT2[Math.floor(Math.random() * validT2.length)] || 10;
+                    candidate = { op: '−', a: t1 + t2, b: t1, answer: t2, attempts: 0 };
+                } else if (range === 'within10') {
+                    const maxSelected = Math.max(...tables);
+                    let num2;
+                    if (maxSelected <= 2) {
+                        num2 = tables[Math.floor(Math.random() * tables.length)];
+                    } else {
+                        const maxB = Math.max(1, 10 - num1);
+                        num2 = Math.floor(Math.random() * maxB) + 1;
+                    }
+                    candidate = { op: '−', a: num1 + num2, b: num1, answer: num2, attempts: 0 };
+                } else if (range === 'within50') {
+                    const a = Math.floor(Math.random() * 26) + 12;
+                    const maxB = 50 - a;
+                    const minB = 5;
+                    const b = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                    candidate = { op: '−', a: a + b, b, answer: a, attempts: 0 };
+                } else if (range === 'within100') {
+                    const a = Math.floor(Math.random() * 45) + 16;
+                    const maxB = 100 - a;
+                    const minB = 10;
+                    const b = Math.floor(Math.random() * Math.max(1, maxB - minB + 1)) + minB;
+                    candidate = { op: '−', a: a + b, b, answer: a, attempts: 0 };
                 } else {
-                    num2 = Math.floor(Math.random() * 12) + 1;
+                    const maxSelected = Math.max(...tables);
+                    let num2;
+                    if (maxSelected <= 2) {
+                        num2 = tables[Math.floor(Math.random() * tables.length)];
+                    } else if (maxSelected <= 5) {
+                        num2 = Math.floor(Math.random() * maxSelected) + 1;
+                    } else {
+                        num2 = Math.floor(Math.random() * 12) + 1;
+                    }
+                    const sum = num1 + num2;
+                    candidate = {
+                        op: '−',
+                        a: sum,
+                        b: num1,
+                        answer: num2,
+                        attempts: 0
+                    };
                 }
-                const sum = num1 + num2;
-                candidate = {
-                    op: '−',
-                    a: sum,
-                    b: num1,
-                    answer: num2,
-                    attempts: 0
-                };
             }
 
             if (!excludeProblem || !this.isSameProblem(candidate, excludeProblem)) {
@@ -353,11 +531,16 @@ class MathEngine {
         const tableB = (isDivision || isSubtraction) ? this.currentProblem.answer : this.currentProblem.b;
 
         // Update stats for participating tables
-        if (this.stats.tableAccuracy[tableA]) {
-            this.stats.tableAccuracy[tableA].total++;
-            if (isCorrect) this.stats.tableAccuracy[tableA].correct++;
+        if (!this.stats.tableAccuracy[tableA]) {
+            this.stats.tableAccuracy[tableA] = { correct: 0, total: 0 };
         }
-        if (this.stats.tableAccuracy[tableB] && tableA !== tableB) {
+        this.stats.tableAccuracy[tableA].total++;
+        if (isCorrect) this.stats.tableAccuracy[tableA].correct++;
+
+        if (tableA !== tableB) {
+            if (!this.stats.tableAccuracy[tableB]) {
+                this.stats.tableAccuracy[tableB] = { correct: 0, total: 0 };
+            }
             this.stats.tableAccuracy[tableB].total++;
             if (isCorrect) this.stats.tableAccuracy[tableB].correct++;
         }

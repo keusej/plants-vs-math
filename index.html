@@ -202,16 +202,31 @@
                 🌻 <strong>Classic Mode:</strong> Defeated zombies drop standard sun orbs to buy powerful plant upgrades (Potato Mines, Double Repeaters, Super Peas, Cherry Bombs, and Super Hot Chili Peppers).
             </div>
 
-            <!-- Table Selection Section -->
+            <!-- Table / Skill Range Selection Section -->
             <div id="tableSectionLabel" class="section-label">Select Tables to Practice (1 to 12)</div>
-            <div class="table-presets">
-                <button class="preset-chip" id="presetAll">All (1-12)</button>
-                <button class="preset-chip" id="presetBeginner">Easy (1, 2, 5, 10)</button>
-                <button class="preset-chip" id="presetHard">Tricky (6, 7, 8, 9, 12)</button>
+
+            <!-- Addition & Subtraction Skill Range Group (Adaptive Smart Menu) -->
+            <div class="skill-range-group hidden" id="addSubRangeGroup">
+                <button type="button" class="skill-range-btn" data-range="within10">🌱 Within 10</button>
+                <button type="button" class="skill-range-btn active" data-range="within20">🌿 Facts to 20</button>
+                <button type="button" class="skill-range-btn" data-range="tens">🔟 Tens (10..90)</button>
+                <button type="button" class="skill-range-btn" data-range="within50">🌻 Up to 50</button>
+                <button type="button" class="skill-range-btn" data-range="within100">⚡ Up to 100</button>
             </div>
+
+            <!-- Table Presets (for 1-12 tables or Within 10/20) -->
+            <div class="table-presets" id="tablePresetsContainer">
+                <button type="button" class="preset-chip" id="presetAll">All (1-12)</button>
+                <button type="button" class="preset-chip" id="presetBeginner">Easy (1, 2, 5, 10)</button>
+                <button type="button" class="preset-chip" id="presetHard">Tricky (6, 7, 8, 9, 12)</button>
+            </div>
+
             <div class="table-buttons-grid" id="tableSelectorGrid">
-                <!-- Buttons 1 to 12 dynamically populated or static -->
+                <!-- Buttons 1 to 12 dynamically populated -->
             </div>
+
+            <!-- Helpful description hint for the active skill/table mode -->
+            <div id="rangeDescriptionHint" class="mode-desc-hint hidden"></div>
 
             <!-- Starting Level Selection (Skip Ahead) -->
             <div class="section-label">Starting Level / Wave (Skip Ahead)</div>

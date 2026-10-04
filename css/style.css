@@ -658,6 +658,41 @@ canvas#gameCanvas {
     color: #3e2723;
 }
 
+/* Addition & Subtraction Skill Range Group (Adaptive Smart Menu) */
+.skill-range-group {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.skill-range-btn {
+    background: #263238;
+    border: 2px solid #546E7A;
+    border-radius: 12px;
+    padding: 7px 14px;
+    color: #ECEFF1;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 3px 0 #1b262c;
+}
+
+.skill-range-btn:hover {
+    transform: translateY(-2px);
+    border-color: #81C784;
+    color: #FFF;
+}
+
+.skill-range-btn.active {
+    background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%);
+    border-color: #C8E6C9;
+    color: #FFF;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5), 0 3px 0 #1B5E20;
+}
+
 /* Math Operation Selection (Multi-select) */
 .math-op-group {
     display: flex;
@@ -1514,10 +1549,10 @@ canvas#gameCanvas {
         font-size: 11px;
         margin: 4px 0 2px;
     }
-    .math-op-group, .game-mode-group, .speed-preset-group {
+    .math-op-group, .game-mode-group, .speed-preset-group, .skill-range-group {
         gap: 4px;
     }
-    .op-btn, .gamemode-btn, .speed-preset-btn {
+    .op-btn, .gamemode-btn, .speed-preset-btn, .skill-range-btn {
         padding: 4px 6px;
         font-size: 10px;
     }
@@ -1705,7 +1740,7 @@ canvas#gameCanvas {
         padding: 6px 4px;
         font-size: 12px;
     }
-    .level-btn {
+    .level-btn, .skill-range-btn {
         padding: 5px 8px;
         font-size: 12px;
     }
