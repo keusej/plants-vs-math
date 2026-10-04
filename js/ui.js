@@ -305,16 +305,36 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.innerHTML = '';
 
         const summary = window.mathEngine.getSummary();
+
+        // Populate High-Level Overall Statistics
+        const accElem = document.getElementById('reportOverallAccuracy');
+        const totElem = document.getElementById('reportOverallTotal');
+        const strElem = document.getElementById('reportBestStreak');
+
+        if (accElem) {
+            if (summary.totalAnswered > 0) {
+                accElem.textContent = `${summary.accuracy}%`;
+                if (summary.accuracy >= 85) accElem.style.color = '#4CAF50';
+                else if (summary.accuracy >= 65) accElem.style.color = '#FFB300';
+                else accElem.style.color = '#FF5252';
+            } else {
+                accElem.textContent = '--';
+                accElem.style.color = '#B0BEC5';
+            }
+        }
+        if (totElem) {
+            totElem.textContent = `${summary.correct} / ${summary.totalAnswered}`;
+        }
+        if (strElem) {
+            strElem.textContent = `${summary.maxStreak}`;
+        }
+
         const stats = summary.tableAccuracy;
 
         for (let i = 1; i <= 12; i++) {
             const data = stats[i] || { correct: 0, total: 0 };
             const card = document.createElement('div');
-            card.style.background = 'rgba(0, 0, 0, 0.4)';
-            card.style.border = '2px solid #78909c';
-            card.style.borderRadius = '10px';
-            card.style.padding = '8px';
-            card.style.textAlign = 'center';
+            card.className = 'report-fact-card';
 
             let pct = data.total > 0 ? Math.round((data.correct / data.total) * 100) : null;
             let statusColor = '#B0BEC5';
@@ -342,25 +362,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             card.innerHTML = `
-                <div style="font-size: 18px; font-weight: 900; color: #FFEB3B;">${opSym} ${i}</div>
-                <div style="font-size: 13px; font-weight: bold; color: ${statusColor}; margin-top: 4px;">${badgeText}</div>
+                <div class="report-card-title">${opSym} ${i}</div>
+                <div class="report-card-stat" style="color: ${statusColor};">${badgeText}</div>
             `;
             grid.appendChild(card);
         }
     }
 
-    document.getElementById('reportBtn')?.addEventListener('click', () => {
+    const openReportModal = () => {
+        window.soundEffects?.unlock();
         renderReportCard();
-        document.getElementById('reportModal').classList.remove('hidden');
-    });
+        document.getElementById('reportModal')?.classList.remove('hidden');
+    };
 
-    document.getElementById('victoryReportBtn')?.addEventListener('click', () => {
-        renderReportCard();
-        document.getElementById('reportModal').classList.remove('hidden');
-    });
+    document.getElementById('reportBtn')?.addEventListener('click', openReportModal);
+    document.getElementById('victoryReportBtn')?.addEventListener('click', openReportModal);
+    document.getElementById('gameOverReportBtn')?.addEventListener('click', openReportModal);
+    document.getElementById('pauseReportBtn')?.addEventListener('click', openReportModal);
 
     document.getElementById('closeReportBtn')?.addEventListener('click', () => {
-        document.getElementById('reportModal').classList.add('hidden');
+        document.getElementById('reportModal')?.classList.add('hidden');
     });
 
     // Safari Tips Modal Handlers

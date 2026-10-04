@@ -899,6 +899,55 @@ canvas#gameCanvas {
     display: none !important;
 }
 
+/* Report Card Modal Grid & Fact Cards */
+#reportCardGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.report-fact-card {
+    background: rgba(0, 0, 0, 0.45);
+    border: 2px solid #78909c;
+    border-radius: 10px;
+    padding: 8px 4px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.report-card-title {
+    font-size: 16px;
+    font-weight: 900;
+    color: #FFEB3B;
+}
+
+.report-card-stat {
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 3px;
+}
+
+@media (max-width: 600px) {
+    #reportCardGrid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+    .report-card-title {
+        font-size: 14px;
+    }
+    .report-card-stat {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 400px) {
+    #reportCardGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+    }
+}
+
 /* Instructions footer */
 .help-footer {
     width: 100%;

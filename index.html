@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="stylesheet" href="css/style.css?v=5.3">
+    <link rel="stylesheet" href="css/style.css?v=6.0">
 </head>
 <body>
 
@@ -45,7 +45,7 @@
             </button>
             <button id="fullscreenBtn" class="header-btn" title="Toggle Fullscreen / Safari Viewport Tips">⛶</button>
             <button id="pauseBtn" class="header-btn" title="Pause Game">⏸️</button>
-            <button id="reportBtn" class="header-btn hidden" style="display: none;" title="View Multiplication Report Card">📊 Report</button>
+            <button id="reportBtn" class="header-btn" title="View Math Accuracy Report Card">📊<span class="btn-word-label"> Report</span></button>
         </div>
     </header>
 
@@ -151,7 +151,7 @@
 
     <!-- Helpful Keyboard Guidance for 5th Grader -->
     <footer class="help-footer">
-        <span>💡 Keyboard: Type numbers directly on your keyboard or numpad. Auto-fires on correct answer!</span>
+        <span>💡 Keyboard: Type your answer and press <span class="keyboard-hint">ENTER</span> (or tap <span class="keyboard-hint">FIRE 🎯</span>).</span>
         <span><span class="keyboard-hint">ESC</span> Pause | <span class="keyboard-hint">BACKSPACE</span> Clear</span>
     </footer>
 
@@ -238,9 +238,9 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: center; gap: 12px;">
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
                 <button id="nextWaveBtn" class="btn-primary">NEXT WAVE ➡️</button>
-                <button id="victoryReportBtn" class="btn-secondary hidden" style="display: none;">View Stats 📊</button>
+                <button id="victoryReportBtn" class="btn-secondary">View Report Card 📊</button>
             </div>
         </div>
     </div>
@@ -271,7 +271,10 @@
                 💡 <strong>Tip:</strong> If the zombies are coming too fast, try setting the speed to 🐌 <strong>Snail (0.5x)</strong> or <strong>0.7x</strong> in settings!
             </div>
 
-            <button id="retryBtn" class="btn-primary">TRY AGAIN 🌻</button>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button id="retryBtn" class="btn-primary">TRY AGAIN 🌻</button>
+                <button id="gameOverReportBtn" class="btn-secondary">View Report Card 📊</button>
+            </div>
         </div>
     </div>
 
@@ -297,6 +300,7 @@
             <button id="restartBtn" class="btn-secondary">Change Tables / Restart 🔄</button>
             <br>
             <div style="margin-top: 12px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button type="button" id="pauseReportBtn" class="safari-help-link" style="font-size: 12px;">📊 View Report Card</button>
                 <button type="button" id="pauseRefreshBtn" class="safari-help-link" style="font-size: 12px;">🔄 Check Updates / Reload</button>
                 <button type="button" id="pauseSafariTipsBtn" class="safari-help-link" style="font-size: 12px;">📱 Fullscreen Guide ℹ️</button>
             </div>
@@ -309,7 +313,23 @@
             <h2 id="reportModalTitle" class="modal-title">📊 Math Mastery Report Card</h2>
             <p id="reportModalSubtitle" class="modal-subtitle">Track your accuracy across each fact table (1 through 12):</p>
 
-            <div id="reportCardGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+            <!-- Overall Summary Statistics -->
+            <div class="stats-grid" style="margin-bottom: 16px;">
+                <div class="stat-card">
+                    <div id="reportOverallAccuracy" class="stat-value" style="color: #4CAF50;">--</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-card">
+                    <div id="reportOverallTotal" class="stat-value">0 / 0</div>
+                    <div class="stat-label">Correct / Total</div>
+                </div>
+                <div class="stat-card">
+                    <div id="reportBestStreak" class="stat-value" style="color: #FF9800;">0</div>
+                    <div class="stat-label">Best Streak 🔥</div>
+                </div>
+            </div>
+
+            <div id="reportCardGrid">
                 <!-- Dynamically populated report badges -->
             </div>
 
@@ -351,10 +371,10 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/audio.js?v=5.3"></script>
-    <script src="js/mathEngine.js?v=5.3"></script>
-    <script src="js/entities.js?v=5.3"></script>
-    <script src="js/game.js?v=5.3"></script>
-    <script src="js/ui.js?v=5.3"></script>
+    <script src="js/audio.js?v=6.0"></script>
+    <script src="js/mathEngine.js?v=6.0"></script>
+    <script src="js/entities.js?v=6.0"></script>
+    <script src="js/game.js?v=6.0"></script>
+    <script src="js/ui.js?v=6.0"></script>
 </body>
 </html>

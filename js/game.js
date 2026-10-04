@@ -153,6 +153,8 @@ class MathDefenseGame {
                 this.backspace();
             } else if (e.key === 'Enter') {
                 this.submitAnswer();
+            } else if (e.key === 'c' || e.key === 'C') {
+                this.clearInput();
             } else if (e.key === 'Escape') {
                 if (this.selectedSeed) {
                     this.selectedSeed = null;
@@ -456,7 +458,9 @@ class MathDefenseGame {
         this.plantHealth = this.maxPlantHealth;
         if (wave === 1) {
             this.sun = 0;
+            this.score = 0;
             this.potatoMines = [];
+            window.mathEngine?.resetStats();
         } else {
             // Potato bombs persist between levels so they don't go away if placed!
             this.potatoMines = this.potatoMines.filter(pm => !pm.dead);
@@ -584,17 +588,6 @@ class MathDefenseGame {
         if (this.currentInput.length >= 4) return;
         this.currentInput += digit;
         this.updateInputDisplay();
-
-        // Instant Auto-Check when length equals answer length
-        if (window.mathEngine.currentProblem) {
-            const targetAnswerStr = String(window.mathEngine.currentProblem.answer);
-            if (this.currentInput.length === targetAnswerStr.length) {
-                // If it matches exactly, auto-fire immediately for lightning-fast gameplay!
-                if (parseInt(this.currentInput, 10) === window.mathEngine.currentProblem.answer) {
-                    this.submitAnswer();
-                }
-            }
-        }
     }
 
     backspace() {
