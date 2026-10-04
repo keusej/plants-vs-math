@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="stylesheet" href="css/style.css?v=6.0">
+    <link rel="stylesheet" href="css/style.css?v=7.0">
 </head>
 <body>
 
@@ -175,11 +175,15 @@
     <div id="startModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="modal-title">🌻 Plants vs. Math 🧟</h2>
+            <div class="start-top-bar">
+                <span class="game-version-badge">v7.0</span>
+                <button type="button" id="startTopUpdateBtn" class="update-pill-btn" title="Check for newest game code and reload">
+                    🔄 Check for Updates
+                </button>
+            </div>
             <p class="modal-subtitle">
                 Zombies are walking down your lawn! Answer math flash cards quickly to shoot pellets and defeat them before they reach your plants!
             </p>
-
-            <!-- Math Operation Selection (Multi-select any combination) -->
             <div class="section-label">Select Math Operations (Choose Any Combination)</div>
             <div class="math-op-group" id="operationToggleGroup">
                 <button class="op-btn active" data-op="addition">➕ Addition (+)</button>
@@ -222,7 +226,10 @@
                 <span id="speedDisplay" class="speed-readout">0.50x (🐌 Snail Pace)</span>
             </div>
 
-            <button id="startPlayBtn" class="btn-primary">DEFEND THE LAWN! 🌿</button>
+            <div class="start-btn-group" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px;">
+                <button id="startPlayBtn" class="btn-primary" style="flex: 1; min-width: 200px;">DEFEND THE LAWN! 🌿</button>
+                <button type="button" id="startUpdateBtn" class="btn-secondary" style="font-size: 14px; padding: 10px 16px;">🔄 Check for Updates</button>
+            </div>
             <p class="mobile-sound-hint">🔊 Mobile Tip: If playing on iPhone/iPad, make sure your side Silent Switch is OFF and volume is up!</p>
             <p class="mobile-safari-hint">📱 <strong>Safari Fullscreen:</strong> Tap Share ➔ <strong>"Add to Home Screen"</strong>, or tap <strong>"aA"</strong> ➔ <strong>"Hide Toolbar"</strong>! <button type="button" id="startSafariHelpBtn" class="safari-help-link">Full Guide ℹ️</button> | <button type="button" id="startRefreshBtn" class="safari-help-link">🔄 Check Updates</button></p>
         </div>
@@ -383,10 +390,10 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/audio.js?v=6.0"></script>
-    <script src="js/mathEngine.js?v=6.0"></script>
-    <script src="js/entities.js?v=6.0"></script>
-    <script src="js/game.js?v=6.0"></script>
-    <script src="js/ui.js?v=6.0"></script>
+    <script src="js/audio.js?v=7.0"></script>
+    <script src="js/mathEngine.js?v=7.0"></script>
+    <script src="js/entities.js?v=7.0"></script>
+    <script src="js/game.js?v=7.0"></script>
+    <script src="js/ui.js?v=7.0"></script>
 </body>
 </html>

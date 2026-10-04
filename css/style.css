@@ -1573,6 +1573,58 @@ canvas#gameCanvas {
     text-align: center;
 }
 
+/* Start Modal Top Bar & Version / Update Controls */
+.start-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.game-version-badge {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1.5px solid #81C784;
+    color: #C8E6C9;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+}
+
+.update-pill-btn {
+    background: linear-gradient(180deg, #37474F 0%, #263238 100%);
+    border: 1.5px solid #FFD54F;
+    color: #FFF9C4;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.update-pill-btn:hover {
+    transform: scale(1.04);
+    background: linear-gradient(180deg, #455A64 0%, #37474F 100%);
+    color: #FFFFFF;
+    box-shadow: 0 0 8px rgba(255, 213, 79, 0.5);
+}
+
+.update-pill-btn:active {
+    transform: scale(0.96);
+}
+
+.start-btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
 
 /* Modals Mobile Scaling */
 @media (max-width: 768px) {

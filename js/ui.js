@@ -422,11 +422,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Check Updates / Reload Handlers (forces fresh cache for pinned Home Screen Web Apps)
-    const reloadWithFreshCache = () => {
+    const reloadWithFreshCache = (e) => {
         window.soundEffects?.unlock();
+        const btn = e?.currentTarget;
+        if (btn) {
+            btn.textContent = 'Checking for Updates... 🔄';
+            btn.style.opacity = '0.75';
+            btn.style.pointerEvents = 'none';
+        }
+
+        // Clear CacheStorage API if available
+        if ('caches' in window) {
+            caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
+        }
+
+        // Unregister any Service Workers if registered
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                for (let r of regs) r.unregister();
+            }).catch(() => {});
+        }
+
         const cleanUrl = window.location.origin + window.location.pathname;
-        window.location.replace(cleanUrl + '?t=' + Date.now());
+        setTimeout(() => {
+            window.location.replace(cleanUrl + '?t=' + Date.now());
+        }, 150);
     };
+
+    document.getElementById('startTopUpdateBtn')?.addEventListener('click', reloadWithFreshCache);
+    document.getElementById('startUpdateBtn')?.addEventListener('click', reloadWithFreshCache);
     document.getElementById('startRefreshBtn')?.addEventListener('click', reloadWithFreshCache);
     document.getElementById('pauseRefreshBtn')?.addEventListener('click', reloadWithFreshCache);
 });
