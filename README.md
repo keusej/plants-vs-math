@@ -18,14 +18,19 @@ Then visit [http://localhost:8000](http://localhost:8000) in your web browser.
 
 ---
 
-## ➕➖✖️➗ Custom Operation Selection (Choose Any Combination!)
+## ➕➖✖️➗ Custom Operation Selection & Adaptive Smart Menu
 
 Customize your arithmetic practice from the game settings with any combination of operations:
-1. **➕ Addition (+)**: Facts from $1$ to $20$ (e.g. $14 + 6 = 20$, $8 + 15 = 23$).
-2. **➖ Subtraction (−)**: Clean $1$ to $20$ subtraction with positive whole-number differences (e.g. $17 - 9 = 8$, $20 - 4 = 16$).
-3. **✖️ Multiplication (×)**: Classic times tables from $1 \times 1$ through $12 \times 12$.
-4. **➗ Division (÷)**: Clean, whole-number division facts ($1 \div 1$ up to $144 \div 12$) with zero remainders.
-5. **Select Any Combination**: Play with just Addition & Subtraction, all four operations, or focus solely on a single operation!
+1. **➕ Addition (+)** & **➖ Subtraction (−)**: Features an **Adaptive Smart Menu** with 5 skill levels designed for early learners through advanced mental math:
+   - 🌱 **Within 10 (Intro)**: Kindergarten & 1st Grade. Sums and minuends strictly $\le 10$ ($4 + 3 = 7$, $9 - 4 = 5$). Includes a number selector (1–10) with beginner presets (e.g. *Just 1 & 2*).
+   - 🌿 **Facts to 20 (Standard)**: 1st & 2nd Grade fact families and sums up to 20 ($8 + 7 = 15$, $14 - 8 = 6$).
+   - 🔟 **Tens (10–90)**: Place-value confidence building ($30 + 40 = 70$, $80 - 30 = 50$) with a clean, zero-clutter layout.
+   - 🌻 **Up to 50**: Intro to two-digit mental math & regrouping ($26 + 18 = 44$, $42 - 17 = 25$).
+   - ⚡ **Up to 100**: Advanced two-digit mental math challenge ($48 + 37 = 85$, $91 - 45 = 46$).
+2. **✖️ Multiplication (×)**: Classic times tables from $1 \times 1$ through $12 \times 12$ with full 1–12 table selector grid.
+3. **➗ Division (÷)**: Clean, whole-number division facts ($1 \div 1$ up to $144 \div 12$) with zero remainders.
+4. **Smart Adaptive Mode**: When multiplication or division is selected, the familiar 1–12 grid is preserved. When only addition or subtraction is chosen, the UI seamlessly morphs into the kid-friendly skill tiers!
+5. **No Duplicate Problems**: The math engine automatically prevents asking the exact same problem or commutative pair twice in a row.
 
 ---
 
@@ -81,12 +86,16 @@ Choose your sun drop style in the start menu:
      - **Area-of-Effect Blast**: Costs 8 sun points. Click the Cherry Bomb seed packet, then click anywhere on the lawn.
      - **KABOOM!**: The cherries puff up, turn bright orange-red, tremble, and detonate with a massive comic explosion (`💥 BOOM!`), obliterating all regular zombies within its 135px blast radius, or dealing a 6 HP critical hit to the Boss! Right-click or press `ESC` to cancel placement.
      - **Balance Rule**: Zombies destroyed by a Cherry Bomb grant score points but do not drop Sun points, keeping the challenge high.
-6. **🧟 GARGANTUAR BOSS BATTLES (Wave 5)**:
-   - **Gargantuar**: Enters on Wave 5 wielding a giant utility pole! He has a massive 16 HP health bar displayed prominently at the top of the screen.
-   - **Imp Throw**: When Gargantuar's health drops to 50% or below ($\le 8$ HP), he roars and launches the tiny **Imp Zombie** from the basket on his back straight over your defenses into an adjacent lane!
-   - **Boss Rewards**: Defeating the Gargantuar earns **+1,500 points**, screen shake fanfare, and drops **3 bonus Sun Orbs**!
-   - **Boss vs. Cherry Bomb**: Cherry Bombs deliver a devastating **6 HP critical hit** to the Boss rather than an instant kill, requiring strategy and pea fire to take him down.
-7. **🛡️ Level Scoring & Star Ratings (Hits-Based, Keyboard Friendly)**:
+6. **🧟 BOSS BATTLES (Gargantuar & Dr. Zomboss Mega Boss)**:
+   - **Wave 5 – Gargantuar Boss**: Enters wielding a telephone pole with a massive 16 HP health bar. When his health drops to 50% or below ($\le 8$ HP), he roars and launches the tiny **Imp Zombie** from his back over your defenses!
+   - **Wave 10+ – Dr. Zomboss in Zombot Mech (Mega Boss)**:
+     - **Phase 1 (The Zombot Mech)**: Dr. Zomboss pilots a massive mechanical walker with robotic hydraulics, animated control levers, and an armored command dome.
+     - **Phase 2 (Ejection & Jump-Back)**: When the Zombot Mech explodes, Dr. Zomboss catapults out, **leaps backwards 30%** across the lawn, and charges forward on foot with fierce determination!
+     - **Boss Rewards**: Defeating a Boss awards **+1,500 points**, golden fanfare, and drops **3 bonus Sun Orbs**!
+     - **Boss vs. Explosives**: Cherry Bombs and Chili Peppers deal devastating critical hits (6–8 HP) to bosses rather than instant kills.
+7. **🚀 Level Skip Selector**:
+   - Skip directly to later waves (Level 1, 2, 3, 5, 8, 10+) from the start screen without having to replay early levels. Defaults to Level 1.
+8. **🛡️ Level Scoring & Star Ratings (Hits-Based, Keyboard Friendly)**:
    - **No Penalty for Rapid Typing**: Because auto-fire triggers immediately on matching digits, level scoring and star ratings are based on **how many hits you take and defense health preserved**, NOT on failed typing attempts!
    - **Lawn Defense Bonus**:
      - **Health Preserved**: Up to `+1,000 pts` (10 pts per % health).
